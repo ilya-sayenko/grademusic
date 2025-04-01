@@ -1,0 +1,30 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: grademusic-service
+  datasource:
+    driver-class-name: "org.postgresql.Driver"
+    url: "jdbc:postgresql://localhost:5432/grademusic"
+    username: "postgres"
+    password: "postgres"
+  liquibase:
+    change-log: "classpath:db/postgresql/liquibase/changelog.xml"
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+
+grade-music:
+  jwt:
+    secret-key: "123451234512345123451234512345123451234512345123451234512345123451234512345"
+  last-fm:
+    api-key:
+    base-url: "http://ws.audioscrobbler.com/2.0/"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
