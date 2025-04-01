@@ -1,0 +1,28 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: grademusic-auth-service
+  datasource:
+    driver-class-name: "org.postgresql.Driver"
+    url: "jdbc:postgresql://localhost:5432/grademusic"
+    username: "postgres"
+    password: "postgres"
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+
+grade-music:
+  jwt:
+    secret-key: "123451234512345123451234512345123451234512345123451234512345123451234512345"
+    expiration: PT15M
+    refresh:
+      expiration: P30D
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
