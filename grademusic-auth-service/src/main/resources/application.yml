@@ -20,6 +20,9 @@ grade-music:
     expiration: PT15M
     refresh:
       expiration: P30D
+  redis:
+    url: "redis://localhost:6379"
+    password: "passWd"
 
 management:
   endpoints:

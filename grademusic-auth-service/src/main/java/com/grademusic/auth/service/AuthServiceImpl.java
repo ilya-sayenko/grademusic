@@ -81,8 +81,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void logout(LogoutRequest logoutRequest) {
         String accessToken = logoutRequest.accessToken();
-        long expirationMs = jwtService.extractExpiration(accessToken).getTime() - System.currentTimeMillis();
-        tokenBlacklistService.addToBlacklist(accessToken, expirationMs);
+        tokenBlacklistService.addToBlacklist(accessToken);
         refreshTokenService.deleteRefreshToken(logoutRequest.refreshToken());
     }
 }

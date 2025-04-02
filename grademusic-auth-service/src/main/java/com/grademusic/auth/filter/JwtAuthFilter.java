@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.grademusic.auth.entity.User;
 import com.grademusic.auth.exception.handler.ErrorResponse;
 import com.grademusic.auth.service.JwtService;
+import com.grademusic.auth.service.TokenBlacklistService;
 import com.grademusic.auth.service.UserService;
 import com.grademusic.auth.utils.JwtUtils;
 import jakarta.servlet.FilterChain;
@@ -29,6 +30,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final UserService userService;
 
+    private final TokenBlacklistService tokenBlacklistService;
+
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
@@ -45,6 +48,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if (!jwtService.isValidToken(token)) {
             sendError(response, "Token is invalid");
+            return;
+        }
+
+        if (tokenBlacklistService.isBlacklisted(token)) {
+            sendError(response, "Token revoked");
             return;
         }
 
