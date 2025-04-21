@@ -1,11 +1,12 @@
 package com.grademusic.main.controller;
 
-import com.grademusic.main.controller.model.AlbumResponse;
-import com.grademusic.main.model.User;
-import com.grademusic.main.utils.AuthUtils;
+import com.grademusic.main.controller.model.AlbumSearchResponse;
+import com.grademusic.main.controller.model.AlbumSearchRequest;
+import com.grademusic.main.mapper.AlbumMapper;
+import com.grademusic.main.service.AlbumService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,10 +17,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AlbumController {
 
-    @GetMapping
-    public List<AlbumResponse> findAlbums(Authentication authentication) {
-        User user = AuthUtils.extractUser(authentication);
+    private final AlbumService albumService;
 
-        return null;
+    private final AlbumMapper albumMapper;
+
+    @GetMapping
+    public List<AlbumSearchResponse> findAlbums(AlbumSearchRequest albumSearchRequest) {
+        return albumMapper.toResponse(albumService.findAlbumsByName(albumSearchRequest.album()));
+    }
+
+    @GetMapping("/{id}")
+    public AlbumSearchResponse findAlbumById(@PathVariable("id") String id) {
+        return albumMapper.toResponse(albumService.findAlbumById(id));
     }
 }

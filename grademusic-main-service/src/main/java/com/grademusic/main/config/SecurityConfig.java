@@ -27,7 +27,9 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-resources/**",
-                                "/v3/api-docs/**"
+                                "/v3/api-docs/**",
+                                "/api/grade-music/main/albums",
+                                "/api/grade-music/main/albums/{id}"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

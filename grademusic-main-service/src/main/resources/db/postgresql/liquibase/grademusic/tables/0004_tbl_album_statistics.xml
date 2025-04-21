@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="insaenko" id="create_table_album_statistics">
+        <createTable tableName="album_statistics">
+            <column name="album_id" type="varchar(255)">
+                <constraints unique="true"/>
+            </column>
+            <column name="average_grade" type="smallint"/>
+            <column name="count_of_grades" type="smallint"/>
+            <column name="updated_at" type="timestamptz"/>
+        </createTable>
+
+<!--        <createIndex indexName="album_statistics_album_id_index" tableName="album_statistics">-->
+<!--            <column name="album_id"/>-->
+<!--        </createIndex>-->
+    </changeSet>
+</databaseChangeLog>

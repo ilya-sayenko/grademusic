@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="insaenko" id="create_table_album_grades">
+        <createTable tableName="album_grades">
+            <column name="user_id" type="bigint"/>
+            <column name="album_id" type="varchar(255)"/>
+            <column name="grade" type="int"/>
+            <column name="auditioned_at" type="date"/>
+            <column name="created_at" type="timestamptz"/>
+            <column name="updated_at" type="timestamptz"/>
+        </createTable>
+
+        <addPrimaryKey
+                columnNames="user_id, album_id"
+                constraintName="pk_album_grades"
+                tableName="album_grades" />
+
+        <addForeignKeyConstraint
+                baseTableName="album_grades"
+                baseColumnNames="user_id"
+                constraintName="fk_user_grades_users"
+                referencedTableName="users"
+                referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>

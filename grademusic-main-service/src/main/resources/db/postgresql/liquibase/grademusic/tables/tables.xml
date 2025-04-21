@@ -7,4 +7,6 @@
 
     <include file="db/postgresql/liquibase/grademusic/tables/0001_tbl_users.xml"/>
     <include file="db/postgresql/liquibase/grademusic/tables/0002_tbl_refresh_tokens.xml"/>
+    <include file="db/postgresql/liquibase/grademusic/tables/0003_tbl_album_grades.xml"/>
+    <include file="db/postgresql/liquibase/grademusic/tables/0004_tbl_album_statistics.xml"/>
 </databaseChangeLog>

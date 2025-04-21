@@ -16,12 +16,22 @@ spring:
     hibernate:
       ddl-auto: validate
 
+
+
 grade-music:
   jwt:
     secret-key: "123451234512345123451234512345123451234512345123451234512345123451234512345"
+  redis:
+    url: "redis://localhost:6379"
+    password: "passWd"
+    cache-expiration: P1D
   last-fm:
-    api-key:
+    api-key: "ecacf91992fe0d233fb4d8e8c4f3a5a0"
     base-url: "http://ws.audioscrobbler.com/2.0/"
+    connection:
+      timeout:
+        connect: PT20S
+        read: PT20S
 
 management:
   endpoints:

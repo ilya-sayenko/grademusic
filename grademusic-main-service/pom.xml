@@ -14,6 +14,7 @@
         <lombok.version>1.18.34</lombok.version>
         <commons.version>3.14.0</commons.version>
         <jjwt.version>0.12.6</jjwt.version>
+        <redisson.version>3.23.2</redisson.version>
     </properties>
 
     <parent>
@@ -74,6 +75,12 @@
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
             <version>${mapstruct.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson</artifactId>
+            <version>${redisson.version}</version>
         </dependency>
 
 <!--        <dependency>-->
