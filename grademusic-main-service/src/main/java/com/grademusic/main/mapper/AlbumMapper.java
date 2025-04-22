@@ -1,31 +1,33 @@
 package com.grademusic.main.mapper;
 
-
 import com.grademusic.main.config.MapperConfig;
-import com.grademusic.main.controller.model.AlbumSearchResponse;
+import com.grademusic.main.controller.model.AlbumResponse;
+import com.grademusic.main.controller.model.TrackResponse;
 import com.grademusic.main.model.Album;
 import com.grademusic.main.model.Image;
+import com.grademusic.main.model.Track;
 import com.grademusic.main.model.lastfm.AlbumLastFm;
 import com.grademusic.main.model.lastfm.ImageLastFm;
+import com.grademusic.main.model.lastfm.TrackLastFm;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Mapper(config = MapperConfig.class)
 public interface AlbumMapper {
 
-    AlbumSearchResponse toResponse(Album album);
+    AlbumResponse toResponse(Album album);
 
-    List<AlbumSearchResponse> toResponse(List<Album> albums);
+    List<AlbumResponse> toResponse(List<Album> albums);
 
     @Mapping(source = "mbid", target = "id")
+    @Mapping(source = "tracks.tracks", target = "tracks")
     Album fromLastFm(AlbumLastFm albumLastFm);
 
     List<Album> fromLastFm(List<AlbumLastFm> albumsLastFm);
 
-    default Image fromLastFm(ArrayList<ImageLastFm> imagesLastFm) {
+    default Image fromLastFmImages(List<ImageLastFm> imagesLastFm) {
         Image.ImageBuilder imageBuilder = Image.builder();
 
         for (ImageLastFm imageLastFm : imagesLastFm) {
@@ -48,4 +50,13 @@ public interface AlbumMapper {
 
         return imageBuilder.build();
     }
+
+    @Mapping(source = "attributes.rank", target = "order")
+    Track fromLastFm(TrackLastFm trackLastFm);
+
+    List<Track> fromLastFmTracks(List<TrackLastFm> tracksLastFm);
+
+    TrackResponse toResponse(Track track);
+
+    List<TrackResponse> toResponses(List<Track> tracks);
 }

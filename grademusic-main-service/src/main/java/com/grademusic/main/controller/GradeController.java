@@ -1,12 +1,14 @@
 package com.grademusic.main.controller;
 
 import com.grademusic.main.controller.model.AuditionDateUpdateRequest;
+import com.grademusic.main.controller.model.GradeAlbumDeleteRequest;
 import com.grademusic.main.controller.model.GradeAlbumRequest;
 import com.grademusic.main.model.User;
 import com.grademusic.main.service.GradeService;
 import com.grademusic.main.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,5 +32,11 @@ public class GradeController {
     public void updateAuditionDate(Authentication authentication, @RequestBody AuditionDateUpdateRequest request) {
         User user = AuthUtils.extractUser(authentication);
         gradeService.updateAuditionDate(user.id(), request.albumId(), request.auditionDate());
+    }
+
+    @DeleteMapping
+    public void deleteGrade(Authentication authentication, @RequestBody GradeAlbumDeleteRequest request) {
+        User user = AuthUtils.extractUser(authentication);
+        gradeService.deleteGrade(user.id(), request.albumId());
     }
 }

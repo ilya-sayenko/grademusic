@@ -6,6 +6,7 @@ import com.grademusic.main.exception.AlbumGradeNotFoundException;
 import com.grademusic.main.repository.AlbumGradeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -16,14 +17,12 @@ public class GradeServiceImpl implements GradeService {
 
     private final AlbumGradeRepository albumGradeRepository;
 
+    private final KafkaClient kafkaClient;
+
     @Override
+    @Transactional
     public void gradeAlbum(long userId, String albumId, int grade) {
-        Optional<AlbumGrade> albumGradeOpt = albumGradeRepository.findById(
-                AlbumGradeId.builder()
-                        .userId(userId)
-                        .albumId(albumId)
-                        .build()
-        );
+        Optional<AlbumGrade> albumGradeOpt = albumGradeRepository.findById(calculateId(userId, albumId));
         AlbumGrade albumGrade;
         if (albumGradeOpt.isEmpty()) {
             albumGrade = AlbumGrade.builder()
@@ -37,6 +36,8 @@ public class GradeServiceImpl implements GradeService {
             albumGrade.setGrade(grade);
         }
         albumGradeRepository.save(albumGrade);
+        kafkaClient.sendUpdateAlbumStatistics(albumId);
+        kafkaClient.sendUpdateUserStatistics(userId);
     }
 
     @Override
@@ -49,5 +50,19 @@ public class GradeServiceImpl implements GradeService {
         ).orElseThrow(() -> new AlbumGradeNotFoundException(String.format("Grade for albumId=%s not found", albumId)));
         albumGrade.setAuditionDate(auditionDate);
         albumGradeRepository.save(albumGrade);
+    }
+
+    @Override
+    @Transactional
+    public void deleteGrade(long userId, String albumId) {
+        albumGradeRepository.deleteById(calculateId(userId, albumId));
+        kafkaClient.sendUpdateAlbumStatistics(albumId);
+    }
+
+    private AlbumGradeId calculateId(long userId, String albumId) {
+        return AlbumGradeId.builder()
+                .userId(userId)
+                .albumId(albumId)
+                .build();
     }
 }

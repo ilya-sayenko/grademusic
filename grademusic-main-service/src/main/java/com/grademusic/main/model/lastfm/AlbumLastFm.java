@@ -1,13 +1,13 @@
 package com.grademusic.main.model.lastfm;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public record AlbumLastFm(
+        String mbid,
         String name,
         String artist,
         String url,
-        ArrayList<ImageLastFm> image,
-        String streamable,
-        String mbid
+        List<ImageLastFm> image,
+        TracksRootLastFm tracks
 ) {
 }

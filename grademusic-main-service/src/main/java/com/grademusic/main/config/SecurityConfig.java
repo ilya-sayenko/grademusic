@@ -29,7 +29,8 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/v3/api-docs/**",
                                 "/api/grade-music/main/albums",
-                                "/api/grade-music/main/albums/{id}"
+                                "/api/grade-music/main/albums/{id}",
+                                "/api/grade-music/main/grades"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

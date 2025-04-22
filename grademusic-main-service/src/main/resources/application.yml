@@ -16,8 +16,6 @@ spring:
     hibernate:
       ddl-auto: validate
 
-
-
 grade-music:
   jwt:
     secret-key: "123451234512345123451234512345123451234512345123451234512345123451234512345"
@@ -25,8 +23,10 @@ grade-music:
     url: "redis://localhost:6379"
     password: "passWd"
     cache-expiration: P1D
+  kafka:
+    bootstrap-servers: "localhost:9092"
   last-fm:
-    api-key: "ecacf91992fe0d233fb4d8e8c4f3a5a0"
+    api-key: ""
     base-url: "http://ws.audioscrobbler.com/2.0/"
     connection:
       timeout:

@@ -1,6 +1,6 @@
 package com.grademusic.main.controller;
 
-import com.grademusic.main.controller.model.AlbumSearchResponse;
+import com.grademusic.main.controller.model.AlbumResponse;
 import com.grademusic.main.controller.model.AlbumSearchRequest;
 import com.grademusic.main.mapper.AlbumMapper;
 import com.grademusic.main.service.AlbumService;
@@ -22,12 +22,12 @@ public class AlbumController {
     private final AlbumMapper albumMapper;
 
     @GetMapping
-    public List<AlbumSearchResponse> findAlbums(AlbumSearchRequest albumSearchRequest) {
+    public List<AlbumResponse> findAlbums(AlbumSearchRequest albumSearchRequest) {
         return albumMapper.toResponse(albumService.findAlbumsByName(albumSearchRequest.album()));
     }
 
     @GetMapping("/{id}")
-    public AlbumSearchResponse findAlbumById(@PathVariable("id") String id) {
+    public AlbumResponse findAlbumById(@PathVariable("id") String id) {
         return albumMapper.toResponse(albumService.findAlbumById(id));
     }
 }
