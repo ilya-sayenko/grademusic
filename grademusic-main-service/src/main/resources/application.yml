@@ -32,9 +32,3 @@ grade-music:
       timeout:
         connect: PT20S
         read: PT20S
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"

@@ -23,9 +23,3 @@ grade-music:
   redis:
     url: "redis://localhost:6379"
     password: "passWd"
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
