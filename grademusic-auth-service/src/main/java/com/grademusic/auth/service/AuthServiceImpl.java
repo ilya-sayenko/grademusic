@@ -81,7 +81,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void logout(LogoutRequest logoutRequest) {
         String accessToken = logoutRequest.accessToken();
+        RefreshToken refreshToken = refreshTokenService.verifyRefreshToken(logoutRequest.refreshToken());
         tokenBlacklistService.addToBlacklist(accessToken);
-        refreshTokenService.deleteRefreshToken(logoutRequest.refreshToken());
+        refreshTokenService.deleteRefreshToken(refreshToken.getToken());
     }
 }
