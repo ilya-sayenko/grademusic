@@ -9,6 +9,7 @@ public record AlbumResponse(
         String id,
         String name,
         String artist,
+        Double grade,
         ImageResponse image,
         List<TrackResponse> tracks
 ) {

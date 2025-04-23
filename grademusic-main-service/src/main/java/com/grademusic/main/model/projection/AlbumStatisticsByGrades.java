@@ -4,5 +4,5 @@ public interface AlbumStatisticsByGrades {
 
     Long getCountOfGrades();
 
-    Double getAverageGrade();
+    Double getGrade();
 }

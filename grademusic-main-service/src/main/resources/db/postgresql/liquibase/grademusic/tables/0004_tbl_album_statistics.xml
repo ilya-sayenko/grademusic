@@ -10,7 +10,7 @@
             <column name="album_id" type="varchar(255)">
                 <constraints unique="true"/>
             </column>
-            <column name="average_grade" type="float"/>
+            <column name="grade" type="float"/>
             <column name="count_of_grades" type="bigint"/>
             <column name="updated_at" type="timestamptz"/>
         </createTable>

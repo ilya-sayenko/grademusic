@@ -11,5 +11,5 @@ public class AlbumStatisticsByGradesImpl implements AlbumStatisticsByGrades {
 
     private Long countOfGrades;
 
-    private Double averageGrade;
+    private Double grade;
 }

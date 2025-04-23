@@ -9,13 +9,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface AlbumGradeRepository extends JpaRepository<AlbumGrade, AlbumGradeId> {
 
     @Query(value = """
             select
                 count(ag.*) countOfGrades,
-                avg(ag.grade) averageGrade
+                avg(ag.grade) grade
             from album_grades ag
             where ag.album_id = :albumId
             """, nativeQuery = true)
@@ -31,4 +33,6 @@ public interface AlbumGradeRepository extends JpaRepository<AlbumGrade, AlbumGra
             where ag.user_id = :userId
             """, nativeQuery = true)
     UserStatisticsByGrades calculateUserStatistics(@Param("userId") Long userId);
+
+    List<AlbumGrade> findByUserId(Long userId);
 }

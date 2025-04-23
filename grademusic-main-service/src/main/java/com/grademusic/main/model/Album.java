@@ -17,6 +17,8 @@ public class Album {
 
     private String artist;
 
+    private Double grade;
+
     private Image image;
 
     private List<Track> tracks;

@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.redisson.api.RedissonClient;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -26,6 +27,10 @@ import java.util.List;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+
+    private final RedissonClient redissonClient;
+
+    private static final String BLACKLIST_MAP = "jwt:blacklist";
 
     @Override
     protected void doFilterInternal(
@@ -43,6 +48,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if (!jwtService.isValidToken(token)) {
             sendError(response, "Token is invalid");
+            return;
+        }
+
+        if (isBlacklisted(token)) {
+            sendError(response, "Token revoked");
             return;
         }
 
@@ -74,5 +84,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         ErrorResponse errorResponse = ErrorResponse.builder().error(message).build();
         byte[] body = new ObjectMapper().writeValueAsBytes(errorResponse);
         response.getOutputStream().write(body);
+    }
+
+    private boolean isBlacklisted(String token) {
+        return redissonClient.getBucket(calculateBucketName(token)).isExists();
+    }
+
+    private String calculateBucketName(String token) {
+        return String.format("%s:%s", BLACKLIST_MAP, token);
     }
 }

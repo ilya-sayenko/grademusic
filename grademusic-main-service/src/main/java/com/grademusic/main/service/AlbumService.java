@@ -9,4 +9,6 @@ public interface AlbumService {
     List<Album> findAlbumsByName(String album);
 
     Album findAlbumById(String id);
+
+    List<Album> findAllAlbumsById(List<String> ids);
 }

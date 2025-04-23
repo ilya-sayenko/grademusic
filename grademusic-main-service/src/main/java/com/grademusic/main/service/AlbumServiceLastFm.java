@@ -1,16 +1,21 @@
 package com.grademusic.main.service;
 
-import com.grademusic.main.config.RedisConfig;
+import com.grademusic.main.entity.AlbumStatistics;
 import com.grademusic.main.mapper.AlbumMapper;
 import com.grademusic.main.model.Album;
 import com.grademusic.main.model.lastfm.AlbumSearchRootLastFm;
+import com.grademusic.main.service.cache.AlbumCache;
 import com.grademusic.main.service.http.LastFmClient;
 import lombok.RequiredArgsConstructor;
-import org.redisson.api.RBucket;
-import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,11 +25,9 @@ public class AlbumServiceLastFm implements AlbumService {
 
     private final AlbumMapper albumMapper;
 
-    private final RedissonClient redissonClient;
+    private final StatisticsService statisticsService;
 
-    private final RedisConfig redisConfig;
-
-    private static final String ALBUMS_CACHE = "albums:";
+    private final AlbumCache albumCache;
 
     @Override
     public List<Album> findAlbumsByName(String album) {
@@ -39,15 +42,45 @@ public class AlbumServiceLastFm implements AlbumService {
 
     @Override
     public Album findAlbumById(String id) {
-        RBucket<Album> cachedAlbum = redissonClient.getBucket(ALBUMS_CACHE + id);
-        if (cachedAlbum.isExists()) {
+        Optional<Album> cachedAlbum = albumCache.findById(id);
+        if (cachedAlbum.isPresent()) {
             return cachedAlbum.get();
         }
 
         Album album = albumMapper.fromLastFm(lastFmClient.albumGetInfo(id).album());
         album.setId(id);
-        cachedAlbum.set(album, redisConfig.getCacheExpiration());
+        Double grade = statisticsService.findAlbumStatisticsById(id).getGrade();
+        album.setGrade(grade);
+        albumCache.put(album);
 
         return album;
+    }
+
+    @Override
+    public List<Album> findAllAlbumsById(List<String> albumIds) {
+        Map<String, Album> albumsFromCache = albumCache.findAllById(albumIds).stream()
+                .collect(Collectors.toMap(Album::getId, Function.identity()));
+
+        Map<String, AlbumStatistics> albumStatisticsMap = new HashMap<>();
+        if (albumsFromCache.size() != albumIds.size()) {
+            albumStatisticsMap = statisticsService.findAllAlbumStatisticsById(albumIds).stream()
+                    .collect(Collectors.toMap(AlbumStatistics::getAlbumId, Function.identity()));
+        }
+
+        List<Album> albums = new ArrayList<>();
+        for (String albumId : albumIds) {
+            Album album = albumsFromCache.get(albumId);
+            if (album == null) {
+                album = albumMapper.fromLastFm(lastFmClient.albumGetInfo(albumId).album());
+                album.setId(albumId);
+            }
+            Double grade = albumStatisticsMap.getOrDefault(albumId, AlbumStatistics.builder().grade(0.0).build())
+                    .getGrade();
+            album.setGrade(grade);
+            albums.add(album);
+            albumCache.put(album);
+        }
+
+        return albums;
     }
 }

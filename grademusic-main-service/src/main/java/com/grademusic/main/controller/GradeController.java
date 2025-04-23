@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(value = "/api/grade-music/main/grades")
+@RequestMapping(value = "/api/grade-music/main/albums/grades")
 @RequiredArgsConstructor
 public class GradeController {
 
