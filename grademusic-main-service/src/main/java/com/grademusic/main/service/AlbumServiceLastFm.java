@@ -1,5 +1,6 @@
 package com.grademusic.main.service;
 
+import com.grademusic.main.controller.model.AlbumSearchRequest;
 import com.grademusic.main.entity.AlbumStatistics;
 import com.grademusic.main.mapper.AlbumMapper;
 import com.grademusic.main.model.Album;
@@ -28,6 +29,20 @@ public class AlbumServiceLastFm implements AlbumService {
     private final StatisticsService statisticsService;
 
     private final AlbumCache albumCache;
+
+    @Override
+    public List<Album> findAlbums(AlbumSearchRequest albumSearchRequest) {
+        String albumName = albumSearchRequest.albumName();
+        if (albumName != null && !albumName.isBlank()) {
+            return findAlbumsByName(albumName);
+        }
+        List<String> albumIds = albumSearchRequest.albumIds();
+        if (albumIds != null && !albumIds.isEmpty()) {
+            return findAllAlbumsById(albumIds);
+        }
+
+        return List.of();
+    }
 
     @Override
     public List<Album> findAlbumsByName(String album) {

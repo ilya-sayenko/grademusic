@@ -20,7 +20,7 @@ public class AlbumStatisticsCacheRedis implements AlbumStatisticsCache {
 
     private final RedisConfig redisConfig;
 
-    private static final String ALBUM_STATISTICS_CACHE = "album-statistics:";
+    private static final String ALBUM_STATISTICS_CACHE = "albumName-statistics:";
 
     @Override
     public Optional<AlbumStatistics> findById(String albumId) {

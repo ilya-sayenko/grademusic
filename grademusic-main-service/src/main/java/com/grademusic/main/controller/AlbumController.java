@@ -10,6 +10,7 @@ import com.grademusic.main.service.StatisticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,8 +30,8 @@ public class AlbumController {
     private final StatisticsMapper statisticsMapper;
 
     @GetMapping
-    public List<AlbumResponse> findAlbums(AlbumSearchRequest albumSearchRequest) {
-        return albumMapper.toResponse(albumService.findAlbumsByName(albumSearchRequest.album()));
+    public List<AlbumResponse> findAlbums(@RequestBody AlbumSearchRequest albumSearchRequest) {
+        return albumMapper.toResponse(albumService.findAlbums(albumSearchRequest));
     }
 
     @GetMapping("/{id}")

@@ -1,9 +1,9 @@
 package com.grademusic.main.controller.model;
 
-import jakarta.validation.constraints.NotNull;
+import java.util.List;
 
 public record AlbumSearchRequest(
-        @NotNull
-        String album
+        String albumName,
+        List<String> albumIds
 ) {
 }

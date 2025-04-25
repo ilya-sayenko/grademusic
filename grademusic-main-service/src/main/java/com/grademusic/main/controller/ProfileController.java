@@ -1,13 +1,16 @@
 package com.grademusic.main.controller;
 
 import com.grademusic.main.controller.model.AlbumResponse;
-import com.grademusic.main.controller.model.UserGradeResponse;
+import com.grademusic.main.controller.model.AuditionDateUpdateRequest;
+import com.grademusic.main.controller.model.AlbumGradeSearchRequest;
+import com.grademusic.main.controller.model.AlbumGradeResponse;
 import com.grademusic.main.controller.model.UserStatisticsResponse;
 import com.grademusic.main.controller.model.UserWishlistRequest;
 import com.grademusic.main.mapper.AlbumMapper;
 import com.grademusic.main.mapper.StatisticsMapper;
-import com.grademusic.main.mapper.UserGradeMapper;
+import com.grademusic.main.mapper.GradeMapper;
 import com.grademusic.main.model.User;
+import com.grademusic.main.service.GradeService;
 import com.grademusic.main.service.ProfileService;
 import com.grademusic.main.service.StatisticsService;
 import com.grademusic.main.utils.AuthUtils;
@@ -16,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,9 +35,11 @@ public class ProfileController {
 
     private final ProfileService profileService;
 
+    private final GradeService gradeService;
+
     private final StatisticsMapper statisticsMapper;
 
-    private final UserGradeMapper userGradeMapper;
+    private final GradeMapper userGradeMapper;
 
     private final AlbumMapper albumMapper;
 
@@ -45,10 +51,23 @@ public class ProfileController {
     }
 
     @GetMapping("/grades")
-    public List<UserGradeResponse> findUserGrades(Authentication authentication) {
+    public List<AlbumGradeResponse> findUserGradesByAlbumIds(
+            Authentication authentication,
+            @RequestBody(required = false) AlbumGradeSearchRequest request
+    ) {
+        User user = AuthUtils.extractUser(authentication);
+        if (request == null) {
+            request = AlbumGradeSearchRequest.builder().build();
+        }
         return userGradeMapper.toResponse(
-                profileService.findGradesByUserId(AuthUtils.extractUser(authentication).id())
+                gradeService.findGrades(request.withUserId(user.id()))
         );
+    }
+
+    @PutMapping("/audition-date")
+    public void updateAuditionDate(Authentication authentication, @RequestBody AuditionDateUpdateRequest request) {
+        User user = AuthUtils.extractUser(authentication);
+        gradeService.updateAuditionDate(user.id(), request.albumId(), request.auditionDate());
     }
 
     @PostMapping("/wishlist")

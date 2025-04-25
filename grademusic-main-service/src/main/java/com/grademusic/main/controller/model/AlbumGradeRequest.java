@@ -1,6 +1,6 @@
 package com.grademusic.main.controller.model;
 
-public record GradeAlbumRequest(
+public record AlbumGradeRequest(
         String albumId,
         int grade
 ) {

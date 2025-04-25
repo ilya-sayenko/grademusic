@@ -1,5 +1,6 @@
 package com.grademusic.main.service;
 
+import com.grademusic.main.controller.model.AlbumGradeSearchRequest;
 import com.grademusic.main.entity.AlbumGrade;
 import com.grademusic.main.entity.AlbumGradeId;
 import com.grademusic.main.exception.AlbumGradeNotFoundException;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -60,6 +62,27 @@ public class GradeServiceImpl implements GradeService {
     public void deleteGrade(long userId, String albumId) {
         albumGradeRepository.deleteById(calculateId(userId, albumId));
         kafkaClient.sendUpdateAlbumStatistics(albumId);
+    }
+
+    @Override
+    public List<AlbumGrade> findGrades(AlbumGradeSearchRequest request) {
+        List<String> albumIds = request.albumIds();
+        Long userId = request.userId();
+        if (albumIds != null && !albumIds.isEmpty()) {
+            return findGradesByUserIdAndAlbumIds(userId, albumIds);
+        }
+
+        return findGradesByUserId(userId);
+    }
+
+    @Override
+    public List<AlbumGrade> findGradesByUserIdAndAlbumIds(Long userId, List<String> albumIds) {
+        return albumGradeRepository.findByUserIdAndAlbumIdIn(userId, albumIds);
+    }
+
+    @Override
+    public List<AlbumGrade> findGradesByUserId(Long userId) {
+        return albumGradeRepository.findByUserId(userId);
     }
 
     private AlbumGradeId calculateId(long userId, String albumId) {

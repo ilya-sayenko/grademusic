@@ -35,4 +35,6 @@ public interface AlbumGradeRepository extends JpaRepository<AlbumGrade, AlbumGra
     UserStatisticsByGrades calculateUserStatistics(@Param("userId") Long userId);
 
     List<AlbumGrade> findByUserId(Long userId);
+
+    List<AlbumGrade> findByUserIdAndAlbumIdIn(Long userId, List<String> albumIds);
 }

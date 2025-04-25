@@ -1,6 +1,6 @@
 package com.grademusic.main.controller.model;
 
-public record GradeAlbumDeleteRequest(
+public record AlbumGradeDeleteRequest(
         String albumId
 ) {
 }
