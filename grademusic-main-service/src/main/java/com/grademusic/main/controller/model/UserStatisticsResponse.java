@@ -6,6 +6,7 @@ import java.time.LocalDate;
 
 @Builder
 public record UserStatisticsResponse(
+        Long userId,
         Double averageGrade,
         Long countOfGrades,
         LocalDate firstGradeDate,

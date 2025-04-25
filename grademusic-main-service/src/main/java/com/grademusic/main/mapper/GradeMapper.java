@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 
 import java.util.List;
 
-@Mapper(config = MapperConfig.class, uses = AlbumMapper.class)
+@Mapper(config = MapperConfig.class)
 public interface GradeMapper {
 
     AlbumGradeResponse toResponse(AlbumGrade albumGrade);
