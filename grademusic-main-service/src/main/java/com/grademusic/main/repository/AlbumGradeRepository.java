@@ -12,7 +12,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface AlbumGradeRepository extends JpaRepository<AlbumGrade, AlbumGradeId> {
@@ -38,8 +37,6 @@ public interface AlbumGradeRepository extends JpaRepository<AlbumGrade, AlbumGra
     UserStatisticsByGrades calculateUserStatistics(@Param("userId") Long userId);
 
     Page<AlbumGrade> findByUserId(Long userId, Pageable pageable);
-
-    Optional<AlbumGrade> findByUserIdAndAlbumId(Long userId, String albumId);
 
     Page<AlbumGrade> findByUserIdAndAlbumIdIn(Long userId, List<String> albumIds, Pageable pageable);
 }

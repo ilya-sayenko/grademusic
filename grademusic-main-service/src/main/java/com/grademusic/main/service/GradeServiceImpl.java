@@ -51,12 +51,8 @@ public class GradeServiceImpl implements GradeService {
 
     @Override
     public void updateAuditionDate(long userId, String albumId, LocalDate auditionDate) {
-        AlbumGrade albumGrade = albumGradeRepository.findById(
-                AlbumGradeId.builder()
-                        .userId(userId)
-                        .albumId(albumId)
-                        .build()
-        ).orElseThrow(() -> new AlbumGradeNotFoundException(String.format("Grade for albumId=%s not found", albumId)));
+        AlbumGrade albumGrade = albumGradeRepository.findById(calculateAlbumGradeId(userId, albumId))
+                .orElseThrow(() -> new AlbumGradeNotFoundException(String.format("Grade for albumId=%s not found", albumId)));
         albumGrade.setAuditionDate(auditionDate);
         albumGradeRepository.save(albumGrade);
     }
@@ -65,12 +61,13 @@ public class GradeServiceImpl implements GradeService {
     @Transactional
     public void deleteGrade(long userId, String albumId) {
         albumGradeRepository.deleteById(calculateAlbumGradeId(userId, albumId));
+        kafkaClient.sendUpdateUserStatistics(userId);
         kafkaClient.sendUpdateAlbumStatistics(albumId);
     }
 
     @Override
     public AlbumGrade findGrade(long userId, String albumId) {
-        return albumGradeRepository.findByUserIdAndAlbumId(userId, albumId)
+        return albumGradeRepository.findById(calculateAlbumGradeId(userId, albumId))
                 .orElse(AlbumGrade.builder().userId(userId).albumId(albumId).build());
     }
 
@@ -88,7 +85,7 @@ public class GradeServiceImpl implements GradeService {
         return findGradesByUserId(userId, paginatedRequest);
     }
 
-    public Page<AlbumGrade> findGradesByUserIdAndAlbumIds(Long userId, List<String> albumIds, PaginatedRequest paginatedRequest) {
+    private Page<AlbumGrade> findGradesByUserIdAndAlbumIds(Long userId, List<String> albumIds, PaginatedRequest paginatedRequest) {
         return albumGradeRepository.findByUserIdAndAlbumIdIn(
                 userId,
                 albumIds,
@@ -100,7 +97,7 @@ public class GradeServiceImpl implements GradeService {
         );
     }
 
-    public Page<AlbumGrade> findGradesByUserId(Long userId, PaginatedRequest paginatedRequest) {
+    private Page<AlbumGrade> findGradesByUserId(Long userId, PaginatedRequest paginatedRequest) {
         return albumGradeRepository.findByUserId(
                 userId,
                 PageRequest.of(

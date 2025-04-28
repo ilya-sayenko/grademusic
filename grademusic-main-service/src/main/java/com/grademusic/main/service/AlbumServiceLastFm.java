@@ -1,7 +1,6 @@
 package com.grademusic.main.service;
 
 import com.grademusic.main.controller.model.AlbumSearchRequest;
-import com.grademusic.main.entity.AlbumStatistics;
 import com.grademusic.main.mapper.AlbumMapper;
 import com.grademusic.main.model.Album;
 import com.grademusic.main.model.lastfm.AlbumSearchRootLastFm;
@@ -11,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,8 +23,6 @@ public class AlbumServiceLastFm implements AlbumService {
     private final LastFmClient lastFmClient;
 
     private final AlbumMapper albumMapper;
-
-    private final StatisticsService statisticsService;
 
     private final AlbumCache albumCache;
 
@@ -53,8 +49,6 @@ public class AlbumServiceLastFm implements AlbumService {
 
         Album album = albumMapper.fromLastFm(lastFmClient.albumGetInfo(id).album());
         album.setId(id);
-        Double grade = statisticsService.findAlbumStatisticsById(id).getGrade();
-        album.setGrade(grade);
         albumCache.put(album);
 
         return album;
@@ -62,25 +56,20 @@ public class AlbumServiceLastFm implements AlbumService {
 
     @Override
     public List<Album> findAllAlbumsById(List<String> albumIds) {
-        Map<String, Album> albumsFromCache = albumCache.findAllById(albumIds).stream()
-                .collect(Collectors.toMap(Album::getId, Function.identity()));
-
-        Map<String, AlbumStatistics> albumStatisticsMap = new HashMap<>();
-        if (albumsFromCache.size() != albumIds.size()) {
-            albumStatisticsMap = statisticsService.findAllAlbumStatisticsById(albumIds).stream()
-                    .collect(Collectors.toMap(AlbumStatistics::getAlbumId, Function.identity()));
+        List<Album> cachedAlbums = albumCache.findAllById(albumIds);
+        if (cachedAlbums.size() == albumIds.size()) {
+            return cachedAlbums;
         }
 
+        Map<String, Album> cachedAlbumsMap = cachedAlbums.stream()
+                .collect(Collectors.toMap(Album::getId, Function.identity()));
         List<Album> albums = new ArrayList<>();
         for (String albumId : albumIds) {
-            Album album = albumsFromCache.get(albumId);
+            Album album = cachedAlbumsMap.get(albumId);
             if (album == null) {
                 album = albumMapper.fromLastFm(lastFmClient.albumGetInfo(albumId).album());
                 album.setId(albumId);
             }
-            Double grade = albumStatisticsMap.getOrDefault(albumId, AlbumStatistics.builder().grade(0.0).build())
-                    .getGrade();
-            album.setGrade(grade);
             albums.add(album);
             albumCache.put(album);
         }
