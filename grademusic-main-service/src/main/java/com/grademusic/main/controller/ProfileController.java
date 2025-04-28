@@ -1,9 +1,10 @@
 package com.grademusic.main.controller;
 
-import com.grademusic.main.controller.model.AlbumResponse;
+import com.grademusic.main.controller.model.AlbumGradePaginatedResponse;
+import com.grademusic.main.controller.model.AlbumPaginatedResponse;
 import com.grademusic.main.controller.model.AuditionDateUpdateRequest;
 import com.grademusic.main.controller.model.AlbumGradeSearchRequest;
-import com.grademusic.main.controller.model.AlbumGradeResponse;
+import com.grademusic.main.controller.model.PaginatedRequest;
 import com.grademusic.main.controller.model.UserStatisticsResponse;
 import com.grademusic.main.controller.model.UserWishlistRequest;
 import com.grademusic.main.mapper.AlbumMapper;
@@ -23,8 +24,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping(value = "/api/grade-music/main/profile")
@@ -51,16 +50,18 @@ public class ProfileController {
     }
 
     @GetMapping("/grades")
-    public List<AlbumGradeResponse> findUserGradesByAlbumIds(
+    public AlbumGradePaginatedResponse findAlbumGrades(
             Authentication authentication,
+            PaginatedRequest paginatedRequest,
             @RequestBody(required = false) AlbumGradeSearchRequest request
     ) {
         User user = AuthUtils.extractUser(authentication);
         if (request == null) {
             request = AlbumGradeSearchRequest.builder().build();
         }
-        return userGradeMapper.toResponse(
-                gradeService.findGrades(request.withUserId(user.id()))
+
+        return userGradeMapper.toPaginatedResponse(
+                gradeService.findPaginatedGrades(request.withUserId(user.id()), paginatedRequest)
         );
     }
 
@@ -83,9 +84,14 @@ public class ProfileController {
     }
 
     @GetMapping("/wishlist")
-    public List<AlbumResponse> getWishlist(Authentication authentication) {
-        return albumMapper.toResponse(
-                profileService.findAlbumsByUserWishlist(AuthUtils.extractUser(authentication).id())
+    public AlbumPaginatedResponse findAlbumGrades(
+            Authentication authentication,
+            PaginatedRequest paginatedRequest
+    ) {
+        User user = AuthUtils.extractUser(authentication);
+
+        return albumMapper.toPaginatedResponse(
+                profileService.findPaginatedAlbumsByUserWishlist(user.id(), paginatedRequest)
         );
     }
 }

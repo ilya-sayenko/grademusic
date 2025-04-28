@@ -45,17 +45,6 @@ public class AlbumServiceLastFm implements AlbumService {
     }
 
     @Override
-    public List<Album> findAlbumsByName(String album) {
-        AlbumSearchRootLastFm lastFmResults = lastFmClient.albumSearch(album);
-
-        return albumMapper.fromLastFm(
-                lastFmResults.results().albumMatches().albums().stream()
-                        .filter(albumLastFm -> !albumLastFm.mbid().isBlank())
-                        .toList()
-        );
-    }
-
-    @Override
     public Album findAlbumById(String id) {
         Optional<Album> cachedAlbum = albumCache.findById(id);
         if (cachedAlbum.isPresent()) {
@@ -97,5 +86,15 @@ public class AlbumServiceLastFm implements AlbumService {
         }
 
         return albums;
+    }
+
+    private List<Album> findAlbumsByName(String album) {
+        AlbumSearchRootLastFm lastFmResults = lastFmClient.albumSearch(album);
+
+        return albumMapper.fromLastFm(
+                lastFmResults.results().albumMatches().albums().stream()
+                        .filter(albumLastFm -> !albumLastFm.mbid().isBlank())
+                        .toList()
+        );
     }
 }

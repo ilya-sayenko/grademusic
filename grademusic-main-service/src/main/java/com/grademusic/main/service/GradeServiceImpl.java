@@ -1,11 +1,15 @@
 package com.grademusic.main.service;
 
 import com.grademusic.main.controller.model.AlbumGradeSearchRequest;
+import com.grademusic.main.controller.model.PaginatedRequest;
 import com.grademusic.main.entity.AlbumGrade;
 import com.grademusic.main.entity.AlbumGradeId;
 import com.grademusic.main.exception.AlbumGradeNotFoundException;
 import com.grademusic.main.repository.AlbumGradeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +30,7 @@ public class GradeServiceImpl implements GradeService {
     @Override
     @Transactional
     public void gradeAlbum(long userId, String albumId, int grade) {
-        Optional<AlbumGrade> albumGradeOpt = albumGradeRepository.findById(calculateId(userId, albumId));
+        Optional<AlbumGrade> albumGradeOpt = albumGradeRepository.findById(calculateAlbumGradeId(userId, albumId));
         AlbumGrade albumGrade;
         if (albumGradeOpt.isEmpty()) {
             albumGrade = AlbumGrade.builder()
@@ -60,32 +64,54 @@ public class GradeServiceImpl implements GradeService {
     @Override
     @Transactional
     public void deleteGrade(long userId, String albumId) {
-        albumGradeRepository.deleteById(calculateId(userId, albumId));
+        albumGradeRepository.deleteById(calculateAlbumGradeId(userId, albumId));
         kafkaClient.sendUpdateAlbumStatistics(albumId);
     }
 
     @Override
-    public List<AlbumGrade> findGrades(AlbumGradeSearchRequest request) {
+    public AlbumGrade findGrade(long userId, String albumId) {
+        return albumGradeRepository.findByUserIdAndAlbumId(userId, albumId)
+                .orElse(AlbumGrade.builder().userId(userId).albumId(albumId).build());
+    }
+
+    @Override
+    public Page<AlbumGrade> findPaginatedGrades(
+            AlbumGradeSearchRequest request,
+            PaginatedRequest paginatedRequest
+    ) {
         List<String> albumIds = request.albumIds();
         Long userId = request.userId();
         if (albumIds != null && !albumIds.isEmpty()) {
-            return findGradesByUserIdAndAlbumIds(userId, albumIds);
+            return findGradesByUserIdAndAlbumIds(userId, albumIds, paginatedRequest);
         }
 
-        return findGradesByUserId(userId);
+        return findGradesByUserId(userId, paginatedRequest);
     }
 
-    @Override
-    public List<AlbumGrade> findGradesByUserIdAndAlbumIds(Long userId, List<String> albumIds) {
-        return albumGradeRepository.findByUserIdAndAlbumIdIn(userId, albumIds);
+    public Page<AlbumGrade> findGradesByUserIdAndAlbumIds(Long userId, List<String> albumIds, PaginatedRequest paginatedRequest) {
+        return albumGradeRepository.findByUserIdAndAlbumIdIn(
+                userId,
+                albumIds,
+                PageRequest.of(
+                        paginatedRequest.page(),
+                        paginatedRequest.perPage(),
+                        Sort.by(Sort.Direction.DESC, "createDate")
+                )
+        );
     }
 
-    @Override
-    public List<AlbumGrade> findGradesByUserId(Long userId) {
-        return albumGradeRepository.findByUserId(userId);
+    public Page<AlbumGrade> findGradesByUserId(Long userId, PaginatedRequest paginatedRequest) {
+        return albumGradeRepository.findByUserId(
+                userId,
+                PageRequest.of(
+                        paginatedRequest.page(),
+                        paginatedRequest.perPage(),
+                        Sort.by(Sort.Direction.DESC, "createDate")
+                )
+        );
     }
 
-    private AlbumGradeId calculateId(long userId, String albumId) {
+    private AlbumGradeId calculateAlbumGradeId(long userId, String albumId) {
         return AlbumGradeId.builder()
                 .userId(userId)
                 .albumId(albumId)

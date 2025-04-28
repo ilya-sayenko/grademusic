@@ -1,7 +1,9 @@
 package com.grademusic.main.mapper;
 
 import com.grademusic.main.config.MapperConfig;
+import com.grademusic.main.controller.model.AlbumPaginatedResponse;
 import com.grademusic.main.controller.model.AlbumResponse;
+import com.grademusic.main.controller.model.PaginatedResponse;
 import com.grademusic.main.controller.model.TrackResponse;
 import com.grademusic.main.model.Album;
 import com.grademusic.main.model.Image;
@@ -11,6 +13,8 @@ import com.grademusic.main.model.lastfm.ImageLastFm;
 import com.grademusic.main.model.lastfm.TrackLastFm;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -26,6 +30,15 @@ public interface AlbumMapper {
     Album fromLastFm(AlbumLastFm albumLastFm);
 
     List<Album> fromLastFm(List<AlbumLastFm> albumsLastFm);
+
+    @Mapping(source = "attributes.rank", target = "order")
+    Track fromLastFm(TrackLastFm trackLastFm);
+
+    List<Track> fromLastFmTracks(List<TrackLastFm> tracksLastFm);
+
+    TrackResponse toResponse(Track track);
+
+    List<TrackResponse> toResponses(List<Track> tracks);
 
     default Image fromLastFmImages(List<ImageLastFm> imagesLastFm) {
         Image.ImageBuilder imageBuilder = Image.builder();
@@ -51,12 +64,18 @@ public interface AlbumMapper {
         return imageBuilder.build();
     }
 
-    @Mapping(source = "attributes.rank", target = "order")
-    Track fromLastFm(TrackLastFm trackLastFm);
+    default AlbumPaginatedResponse toPaginatedResponse(Page<Album> albums) {
+        Pageable pageable = albums.getPageable();
 
-    List<Track> fromLastFmTracks(List<TrackLastFm> tracksLastFm);
-
-    TrackResponse toResponse(Track track);
-
-    List<TrackResponse> toResponses(List<Track> tracks);
+        return AlbumPaginatedResponse.builder()
+                .data(toResponse(albums.getContent()))
+                .pagination(
+                        PaginatedResponse.builder()
+                                .currentPage(pageable.getPageNumber())
+                                .perPage(pageable.getPageSize())
+                                .totalCount(albums.getTotalElements())
+                                .build()
+                )
+                .build();
+    }
 }

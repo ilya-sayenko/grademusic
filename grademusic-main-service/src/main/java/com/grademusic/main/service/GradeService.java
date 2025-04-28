@@ -1,10 +1,11 @@
 package com.grademusic.main.service;
 
 import com.grademusic.main.controller.model.AlbumGradeSearchRequest;
+import com.grademusic.main.controller.model.PaginatedRequest;
 import com.grademusic.main.entity.AlbumGrade;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
-import java.util.List;
 
 public interface GradeService {
 
@@ -14,9 +15,7 @@ public interface GradeService {
 
     void deleteGrade(long userId, String albumId);
 
-    List<AlbumGrade> findGrades(AlbumGradeSearchRequest request);
+    AlbumGrade findGrade(long userId, String albumId);
 
-    List<AlbumGrade> findGradesByUserIdAndAlbumIds(Long userId, List<String> albumIds);
-
-    List<AlbumGrade> findGradesByUserId(Long userId);
+    Page<AlbumGrade> findPaginatedGrades(AlbumGradeSearchRequest request, PaginatedRequest paginatedRequest);
 }

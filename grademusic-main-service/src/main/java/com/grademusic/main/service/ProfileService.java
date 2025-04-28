@@ -1,8 +1,8 @@
 package com.grademusic.main.service;
 
+import com.grademusic.main.controller.model.PaginatedRequest;
 import com.grademusic.main.model.Album;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 public interface ProfileService {
 
@@ -10,5 +10,5 @@ public interface ProfileService {
 
     void deleteAlbumFromWishList(Long userId, String albumId);
 
-    List<Album> findAlbumsByUserWishlist(Long userId);
+    Page<Album> findPaginatedAlbumsByUserWishlist(Long userId, PaginatedRequest paginatedRequest);
 }
