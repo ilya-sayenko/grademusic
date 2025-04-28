@@ -23,19 +23,19 @@ public class ProfileServiceTest {
     private ProfileServiceImpl profileService;
 
     @Test
-    public void shouldAddAlbumToWishList() {
+    public void shouldAddAlbumToWishlist() {
         long userId = 1;
         String albumId = "album";
-        profileService.addAlbumToWishList(userId, albumId);
+        profileService.addAlbumToWishlist(userId, albumId);
 
         verify(wishlistRepository, atLeastOnce()).save(any(WishlistItem.class));
     }
 
     @Test
-    public void shouldDeleteAlbumFromWishList() {
+    public void shouldDeleteAlbumFromWishlist() {
         long userId = 1;
         String albumId = "album";
-        profileService.deleteAlbumFromWishList(userId, albumId);
+        profileService.deleteAlbumFromWishlist(userId, albumId);
 
         verify(wishlistRepository, atLeastOnce()).deleteById(any(WishlistItemId.class));
     }

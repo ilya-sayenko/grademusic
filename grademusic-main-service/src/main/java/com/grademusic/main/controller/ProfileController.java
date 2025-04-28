@@ -74,13 +74,13 @@ public class ProfileController {
     @PostMapping("/wishlist")
     public void addAlbumToWishlist(Authentication authentication, @RequestBody UserWishlistRequest request) {
         User user = AuthUtils.extractUser(authentication);
-        profileService.addAlbumToWishList(user.id(), request.albumId());
+        profileService.addAlbumToWishlist(user.id(), request.albumId());
     }
 
     @DeleteMapping("/wishlist")
     public void deleteAlbumFromWishlist(Authentication authentication, @RequestBody UserWishlistRequest request) {
         User user = AuthUtils.extractUser(authentication);
-        profileService.deleteAlbumFromWishList(user.id(), request.albumId());
+        profileService.deleteAlbumFromWishlist(user.id(), request.albumId());
     }
 
     @GetMapping("/wishlist")

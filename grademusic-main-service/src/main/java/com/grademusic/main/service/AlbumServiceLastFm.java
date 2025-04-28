@@ -7,6 +7,7 @@ import com.grademusic.main.model.lastfm.AlbumSearchRootLastFm;
 import com.grademusic.main.service.cache.AlbumCache;
 import com.grademusic.main.service.http.LastFmClient;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AlbumServiceLastFm implements AlbumService {
 
@@ -44,6 +46,7 @@ public class AlbumServiceLastFm implements AlbumService {
     public Album findAlbumById(String id) {
         Optional<Album> cachedAlbum = albumCache.findById(id);
         if (cachedAlbum.isPresent()) {
+            log.info("Getting album id={} from cache", id);
             return cachedAlbum.get();
         }
 
@@ -58,6 +61,7 @@ public class AlbumServiceLastFm implements AlbumService {
     public List<Album> findAllAlbumsById(List<String> albumIds) {
         List<Album> cachedAlbums = albumCache.findAllById(albumIds);
         if (cachedAlbums.size() == albumIds.size()) {
+            log.info("Getting albums ids={} from cache", albumIds);
             return cachedAlbums;
         }
 
@@ -67,6 +71,7 @@ public class AlbumServiceLastFm implements AlbumService {
         for (String albumId : albumIds) {
             Album album = cachedAlbumsMap.get(albumId);
             if (album == null) {
+                log.info("Getting album id={} from LastFm", albumId);
                 album = albumMapper.fromLastFm(lastFmClient.albumGetInfo(albumId).album());
                 album.setId(albumId);
             }
@@ -78,6 +83,7 @@ public class AlbumServiceLastFm implements AlbumService {
     }
 
     private List<Album> findAlbumsByName(String album) {
+        log.info("Getting album name={} from LastFm", album);
         AlbumSearchRootLastFm lastFmResults = lastFmClient.albumSearch(album);
 
         return albumMapper.fromLastFm(

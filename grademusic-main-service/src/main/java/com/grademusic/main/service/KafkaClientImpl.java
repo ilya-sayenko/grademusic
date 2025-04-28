@@ -19,11 +19,13 @@ public class KafkaClientImpl implements KafkaClient {
 
     @Override
     public void sendUpdateAlbumStatistics(String albumId) {
+        log.info("Sending message for updating album id={} statistics", albumId);
         kafkaAlbumStatistics.send(ALBUM_STATISTICS_TOPIC, albumId);
     }
 
     @Override
     public void sendUpdateUserStatistics(Long userId) {
+        log.info("Sending message for updating user id={} statistics", userId);
         kafkaUserStatistics.send(USER_STATISTICS_TOPIC, userId);
     }
 }

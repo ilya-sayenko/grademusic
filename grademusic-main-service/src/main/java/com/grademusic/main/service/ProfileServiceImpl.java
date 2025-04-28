@@ -24,7 +24,7 @@ public class ProfileServiceImpl implements ProfileService {
     private final AlbumService albumService;
 
     @Override
-    public void addAlbumToWishList(Long userId, String albumId) {
+    public void addAlbumToWishlist(Long userId, String albumId) {
        if (wishlistRepository.existsById(calculateWishlistItemId(userId, albumId))) {
            throw new WishlistItemExistsException(String.format("Album id=%s has been already added to wishlist", albumId));
        }
@@ -37,7 +37,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public void deleteAlbumFromWishList(Long userId, String albumId) {
+    public void deleteAlbumFromWishlist(Long userId, String albumId) {
         wishlistRepository.deleteById(calculateWishlistItemId(userId, albumId));
     }
 

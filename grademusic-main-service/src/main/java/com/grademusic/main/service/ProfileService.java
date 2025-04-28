@@ -6,9 +6,9 @@ import org.springframework.data.domain.Page;
 
 public interface ProfileService {
 
-    void addAlbumToWishList(Long userId, String albumId);
+    void addAlbumToWishlist(Long userId, String albumId);
 
-    void deleteAlbumFromWishList(Long userId, String albumId);
+    void deleteAlbumFromWishlist(Long userId, String albumId);
 
     Page<Album> findPaginatedAlbumsByUserWishlist(Long userId, PaginatedRequest paginatedRequest);
 }

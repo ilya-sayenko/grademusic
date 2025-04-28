@@ -47,7 +47,7 @@ public class GradeServiceTest {
         gradeService.gradeAlbum(userId, albumId, grade);
 
         verify(albumGradeRepository, atLeastOnce()).save(any(AlbumGrade.class));
-        verify(profileService, atLeastOnce()).deleteAlbumFromWishList(userId, albumId);
+        verify(profileService, atLeastOnce()).deleteAlbumFromWishlist(userId, albumId);
         verify(kafkaClient, atLeastOnce()).sendUpdateAlbumStatistics(albumId);
         verify(kafkaClient, atLeastOnce()).sendUpdateUserStatistics(userId);
     }
@@ -63,7 +63,7 @@ public class GradeServiceTest {
         gradeService.gradeAlbum(userId, albumId, grade);
 
         verify(albumGradeRepository, atLeastOnce()).save(any(AlbumGrade.class));
-        verify(profileService, atLeastOnce()).deleteAlbumFromWishList(userId, albumId);
+        verify(profileService, atLeastOnce()).deleteAlbumFromWishlist(userId, albumId);
         verify(kafkaClient, atLeastOnce()).sendUpdateAlbumStatistics(albumId);
         verify(kafkaClient, atLeastOnce()).sendUpdateUserStatistics(userId);
     }

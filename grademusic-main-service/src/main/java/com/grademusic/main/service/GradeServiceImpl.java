@@ -44,7 +44,7 @@ public class GradeServiceImpl implements GradeService {
             albumGrade.setGrade(grade);
         }
         albumGradeRepository.save(albumGrade);
-        profileService.deleteAlbumFromWishList(userId, albumId);
+        profileService.deleteAlbumFromWishlist(userId, albumId);
         kafkaClient.sendUpdateAlbumStatistics(albumId);
         kafkaClient.sendUpdateUserStatistics(userId);
     }
