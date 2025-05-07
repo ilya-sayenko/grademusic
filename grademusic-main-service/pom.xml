@@ -16,6 +16,8 @@
         <jjwt.version>0.12.6</jjwt.version>
         <redisson.version>3.23.2</redisson.version>
         <kafka.version>3.3.1</kafka.version>
+        <instancio.version>2.6.0</instancio.version>
+        <assertj.version>3.26.0</assertj.version>
     </properties>
 
     <parent>
@@ -137,14 +139,14 @@
         <dependency>
             <groupId>org.instancio</groupId>
             <artifactId>instancio-core</artifactId>
-            <version>2.6.0</version>
+            <version>${instancio.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.26.0</version>
+            <version>${assertj.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
