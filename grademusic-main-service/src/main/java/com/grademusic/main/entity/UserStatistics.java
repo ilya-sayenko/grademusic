@@ -33,6 +33,9 @@ public class UserStatistics {
     @Column(name = "count_of_grades")
     private Long countOfGrades;
 
+    @Column(name = "count_of_wishlist_items")
+    private Long countOfWishlistItems;
+
     @Column(name = "first_grade_at")
     private LocalDate firstGradeDate;
 

@@ -4,8 +4,10 @@ import com.grademusic.main.controller.model.AlbumGradeSearchRequest;
 import com.grademusic.main.controller.model.PaginatedRequest;
 import com.grademusic.main.entity.AlbumGrade;
 import com.grademusic.main.entity.AlbumGradeId;
+import com.grademusic.main.entity.WishlistItemId;
 import com.grademusic.main.exception.AlbumGradeNotFoundException;
 import com.grademusic.main.repository.AlbumGradeRepository;
+import com.grademusic.main.repository.WishlistRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,36 +19,26 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static com.grademusic.main.model.StatisticsType.GRADES;
+import static com.grademusic.main.model.StatisticsType.WISHLIST;
+
 @Service
 @RequiredArgsConstructor
 public class GradeServiceImpl implements GradeService {
 
     private final AlbumGradeRepository albumGradeRepository;
 
-    private final ProfileService profileService;
+    private final WishlistRepository wishlistRepository;
 
     private final KafkaClient kafkaClient;
 
     @Override
-    @Transactional
     public void gradeAlbum(long userId, String albumId, int grade) {
-        Optional<AlbumGrade> albumGradeOpt = albumGradeRepository.findById(calculateAlbumGradeId(userId, albumId));
-        AlbumGrade albumGrade;
-        if (albumGradeOpt.isEmpty()) {
-            albumGrade = AlbumGrade.builder()
-                    .userId(userId)
-                    .albumId(albumId)
-                    .grade(grade)
-                    .auditionDate(LocalDate.now())
-                    .build();
-        } else {
-            albumGrade = albumGradeOpt.get();
-            albumGrade.setGrade(grade);
-        }
-        albumGradeRepository.save(albumGrade);
-        profileService.deleteAlbumFromWishlist(userId, albumId);
-        kafkaClient.sendUpdateAlbumStatistics(albumId);
-        kafkaClient.sendUpdateUserStatistics(userId);
+        saveAlbumGradeAndDeleteFromWishlist(userId, albumId, grade);
+        kafkaClient.sendUpdateAlbumStatistics(albumId, GRADES);
+        kafkaClient.sendUpdateAlbumStatistics(albumId, WISHLIST);
+        kafkaClient.sendUpdateUserStatistics(userId, GRADES);
+        kafkaClient.sendUpdateUserStatistics(userId, WISHLIST);
     }
 
     @Override
@@ -58,11 +50,13 @@ public class GradeServiceImpl implements GradeService {
     }
 
     @Override
-    @Transactional
     public void deleteGrade(long userId, String albumId) {
-        albumGradeRepository.deleteById(calculateAlbumGradeId(userId, albumId));
-        kafkaClient.sendUpdateUserStatistics(userId);
-        kafkaClient.sendUpdateAlbumStatistics(albumId);
+        AlbumGradeId albumGradeId = calculateAlbumGradeId(userId, albumId);
+        if (albumGradeRepository.existsById(albumGradeId)) {
+            albumGradeRepository.deleteById(albumGradeId);
+            kafkaClient.sendUpdateUserStatistics(userId, GRADES);
+            kafkaClient.sendUpdateAlbumStatistics(albumId, GRADES);
+        }
     }
 
     @Override
@@ -113,5 +107,30 @@ public class GradeServiceImpl implements GradeService {
                 .userId(userId)
                 .albumId(albumId)
                 .build();
+    }
+
+    @Transactional
+    private void saveAlbumGradeAndDeleteFromWishlist(long userId, String albumId, int grade) {
+        Optional<AlbumGrade> albumGradeOpt = albumGradeRepository.findById(calculateAlbumGradeId(userId, albumId));
+        AlbumGrade albumGrade;
+        if (albumGradeOpt.isEmpty()) {
+            albumGrade = AlbumGrade.builder()
+                    .userId(userId)
+                    .albumId(albumId)
+                    .grade(grade)
+                    .auditionDate(LocalDate.now())
+                    .build();
+        } else {
+            albumGrade = albumGradeOpt.get();
+            albumGrade.setGrade(grade);
+        }
+        albumGradeRepository.save(albumGrade);
+        WishlistItemId wishlistItemId = WishlistItemId.builder()
+                .userId(userId)
+                .albumId(albumId)
+                .build();
+        if (wishlistRepository.existsById(wishlistItemId)) {
+            wishlistRepository.deleteById(wishlistItemId);
+        }
     }
 }

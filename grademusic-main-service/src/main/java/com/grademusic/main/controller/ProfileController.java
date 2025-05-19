@@ -13,8 +13,9 @@ import com.grademusic.main.mapper.GradeMapper;
 import com.grademusic.main.model.User;
 import com.grademusic.main.service.GradeService;
 import com.grademusic.main.service.ProfileService;
-import com.grademusic.main.service.StatisticsService;
+import com.grademusic.main.service.statistics.StatisticsService;
 import com.grademusic.main.utils.AuthUtils;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -66,19 +67,19 @@ public class ProfileController {
     }
 
     @PutMapping("/audition-date")
-    public void updateAuditionDate(Authentication authentication, @RequestBody AuditionDateUpdateRequest request) {
+    public void updateAuditionDate(Authentication authentication, @RequestBody @Valid AuditionDateUpdateRequest request) {
         User user = AuthUtils.extractUser(authentication);
         gradeService.updateAuditionDate(user.id(), request.albumId(), request.auditionDate());
     }
 
     @PostMapping("/wishlist")
-    public void addAlbumToWishlist(Authentication authentication, @RequestBody UserWishlistRequest request) {
+    public void addAlbumToWishlist(Authentication authentication, @RequestBody @Valid UserWishlistRequest request) {
         User user = AuthUtils.extractUser(authentication);
         profileService.addAlbumToWishlist(user.id(), request.albumId());
     }
 
     @DeleteMapping("/wishlist")
-    public void deleteAlbumFromWishlist(Authentication authentication, @RequestBody UserWishlistRequest request) {
+    public void deleteAlbumFromWishlist(Authentication authentication, @RequestBody @Valid UserWishlistRequest request) {
         User user = AuthUtils.extractUser(authentication);
         profileService.deleteAlbumFromWishlist(user.id(), request.albumId());
     }

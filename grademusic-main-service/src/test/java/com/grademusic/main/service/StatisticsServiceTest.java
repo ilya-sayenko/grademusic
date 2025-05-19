@@ -2,15 +2,11 @@ package com.grademusic.main.service;
 
 import com.grademusic.main.entity.AlbumStatistics;
 import com.grademusic.main.entity.UserStatistics;
-import com.grademusic.main.model.Album;
-import com.grademusic.main.model.projection.AlbumStatisticsByGradesImpl;
-import com.grademusic.main.model.projection.UserStatisticsByGradesImpl;
-import com.grademusic.main.repository.AlbumGradeRepository;
 import com.grademusic.main.repository.AlbumStatisticsRepository;
 import com.grademusic.main.repository.UserStatisticsRepository;
-import com.grademusic.main.service.cache.AlbumCache;
 import com.grademusic.main.service.cache.AlbumStatisticsCache;
 import com.grademusic.main.service.cache.UserStatisticsCache;
+import com.grademusic.main.service.statistics.StatisticsServiceImpl;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
@@ -30,9 +25,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class StatisticsServiceTest {
-
-    @Mock
-    private AlbumGradeRepository albumGradeRepository;
 
     @Mock
     private AlbumStatisticsRepository albumStatisticsRepository;
@@ -46,53 +38,8 @@ public class StatisticsServiceTest {
     @Mock
     private UserStatisticsCache userStatisticsCache;
 
-    @Mock
-    private AlbumCache albumCache;
-
     @InjectMocks
     private StatisticsServiceImpl statisticsService;
-
-    @Test
-    public void shouldUpdateAlbumStatistics() {
-        String albumId = "album";
-        when(albumGradeRepository.calculateAlbumStatistics(albumId))
-                .thenReturn(Instancio.create(AlbumStatisticsByGradesImpl.class));
-        when(albumStatisticsRepository.saveAndFlush(any(AlbumStatistics.class)))
-                .thenReturn(Instancio.create(AlbumStatistics.class));
-        when(albumCache.findById(albumId)).thenReturn(Optional.empty());
-        statisticsService.updateAlbumStatistics(albumId);
-
-        verify(albumStatisticsRepository, atLeastOnce()).saveAndFlush(any(AlbumStatistics.class));
-        verify(albumStatisticsCache, atLeastOnce()).put(any(AlbumStatistics.class));
-    }
-
-    @Test
-    public void shouldUpdateAlbumStatisticsForAlbumInCache() {
-        String albumId = "album";
-        when(albumGradeRepository.calculateAlbumStatistics(albumId))
-                .thenReturn(Instancio.create(AlbumStatisticsByGradesImpl.class));
-        when(albumStatisticsRepository.saveAndFlush(any(AlbumStatistics.class)))
-                .thenReturn(Instancio.create(AlbumStatistics.class));
-        when(albumCache.findById(albumId)).thenReturn(Optional.of(Instancio.create(Album.class)));
-        statisticsService.updateAlbumStatistics(albumId);
-
-        verify(albumStatisticsRepository, atLeastOnce()).saveAndFlush(any(AlbumStatistics.class));
-        verify(albumStatisticsCache, atLeastOnce()).put(any(AlbumStatistics.class));
-        verify(albumCache, atLeastOnce()).put(any(Album.class));
-    }
-
-    @Test
-    public void shouldUpdateUserStatistics() {
-        long userId = 1L;
-        when(albumGradeRepository.calculateUserStatistics(userId))
-                .thenReturn(Instancio.create(UserStatisticsByGradesImpl.class));
-        when(userStatisticsRepository.saveAndFlush(any(UserStatistics.class)))
-                .thenReturn(Instancio.create(UserStatistics.class));
-        statisticsService.updateUserStatistics(userId);
-
-        verify(userStatisticsRepository, atLeastOnce()).saveAndFlush(any(UserStatistics.class));
-        verify(userStatisticsCache, atLeastOnce()).put(any(UserStatistics.class));
-    }
 
     @Test
     public void shouldFindAlbumStatisticsByIdFromDatabase() {

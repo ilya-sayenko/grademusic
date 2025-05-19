@@ -11,6 +11,8 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class UserStatisticsByGradesImpl implements UserStatisticsByGrades {
 
+    private Long userId;
+
     private Long countOfGrades;
 
     private Double averageGrade;

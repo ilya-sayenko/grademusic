@@ -9,6 +9,7 @@ public record UserStatisticsResponse(
         Long userId,
         Double averageGrade,
         Long countOfGrades,
+        Long countOfWishlistItems,
         LocalDate firstGradeDate,
         LocalDate lastGradeDate
 ) {

@@ -12,8 +12,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static com.grademusic.main.model.StatisticsType.WISHLIST;
 
 @Service
 @RequiredArgsConstructor
@@ -23,22 +26,29 @@ public class ProfileServiceImpl implements ProfileService {
 
     private final AlbumService albumService;
 
+    private final KafkaClient kafkaClient;
+
     @Override
     public void addAlbumToWishlist(Long userId, String albumId) {
-       if (wishlistRepository.existsById(calculateWishlistItemId(userId, albumId))) {
-           throw new WishlistItemExistsException(String.format("Album id=%s has been already added to wishlist", albumId));
-       }
+        if (wishlistRepository.existsById(calculateWishlistItemId(userId, albumId))) {
+            throw new WishlistItemExistsException(String.format("Album id=%s has been already added to wishlist", albumId));
+        }
         wishlistRepository.save(
                 WishlistItem.builder()
                         .userId(userId)
                         .albumId(albumId)
                         .build()
         );
+        kafkaClient.sendUpdateUserStatistics(userId, WISHLIST);
+        kafkaClient.sendUpdateAlbumStatistics(albumId, WISHLIST);
     }
 
     @Override
     public void deleteAlbumFromWishlist(Long userId, String albumId) {
-        wishlistRepository.deleteById(calculateWishlistItemId(userId, albumId));
+        if (deleteWishlistItemFromDatabase(userId, albumId)) {
+            kafkaClient.sendUpdateUserStatistics(userId, WISHLIST);
+            kafkaClient.sendUpdateAlbumStatistics(albumId, WISHLIST);
+        }
     }
 
     @Override
@@ -62,5 +72,15 @@ public class ProfileServiceImpl implements ProfileService {
                 .userId(userId)
                 .albumId(albumId)
                 .build();
+    }
+
+    @Transactional
+    private boolean deleteWishlistItemFromDatabase(Long userId, String albumId) {
+        WishlistItemId wishlistItemId = calculateWishlistItemId(userId, albumId);
+        if (wishlistRepository.existsById(wishlistItemId)) {
+            wishlistRepository.deleteById(wishlistItemId);
+            return true;
+        }
+        return false;
     }
 }

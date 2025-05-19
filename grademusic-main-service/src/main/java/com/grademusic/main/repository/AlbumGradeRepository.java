@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,23 +17,29 @@ public interface AlbumGradeRepository extends JpaRepository<AlbumGrade, AlbumGra
 
     @Query(value = """
             select
+                albumId,
                 count(ag.*) countOfGrades,
-                avg(ag.grade) grade
-            from album_grades ag
-            where ag.album_id = :albumId
+                avg(coalesce(ag.grade, 0)) grade
+            from unnest(array[ :albumIds ]) albumId
+            left join album_grades ag
+                   on ag.album_id = albumId
+            group by albumId
             """, nativeQuery = true)
-    AlbumStatisticsByGrades calculateAlbumStatistics(@Param("albumId") String albumId);
+    List<AlbumStatisticsByGrades> calculateAlbumsStatistics(List<String> albumIds);
 
     @Query(value = """
             select
+                userId,
                 count(ag.*) countOfGrades,
-                avg(ag.grade) averageGrade,
+                avg(coalesce(ag.grade, 0)) averageGrade,
                 cast(min(ag.created_at) as date) firstGradeDate,
                 cast(max(ag.created_at) as date) lastGradeDate
-            from album_grades ag
-            where ag.user_id = :userId
+            from unnest(array[ :userIds ]) userId
+            left join album_grades ag
+                   on ag.user_id = userId
+            group by userId
             """, nativeQuery = true)
-    UserStatisticsByGrades calculateUserStatistics(@Param("userId") Long userId);
+    List<UserStatisticsByGrades> calculateUsersStatistics(List<Long> userIds);
 
     Page<AlbumGrade> findByUserId(Long userId, Pageable pageable);
 

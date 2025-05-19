@@ -32,6 +32,9 @@ public class AlbumStatistics {
     @Column(name = "count_of_grades")
     private Long countOfGrades;
 
+    @Column(name = "count_of_wishlist_items")
+    private Long countOfWishlistItems;
+
     @Column(name = "updated_at")
     @UpdateTimestamp
     private OffsetDateTime updateDate;

@@ -12,6 +12,7 @@
             </column>
             <column name="grade" type="float"/>
             <column name="count_of_grades" type="bigint"/>
+            <column name="count_of_wishlist_items" type="bigint"/>
             <column name="updated_at" type="timestamptz"/>
         </createTable>
     </changeSet>

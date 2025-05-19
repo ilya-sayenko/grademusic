@@ -6,7 +6,7 @@ import com.grademusic.main.controller.model.AlbumStatisticsResponse;
 import com.grademusic.main.mapper.AlbumMapper;
 import com.grademusic.main.mapper.StatisticsMapper;
 import com.grademusic.main.service.AlbumService;
-import com.grademusic.main.service.StatisticsService;
+import com.grademusic.main.service.statistics.StatisticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

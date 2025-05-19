@@ -6,6 +6,7 @@ import lombok.Builder;
 public record AlbumStatisticsResponse(
         String albumId,
         Double grade,
-        Long countOfGrades
+        Long countOfGrades,
+        Long countOfWishlistItems
 ) {
 }

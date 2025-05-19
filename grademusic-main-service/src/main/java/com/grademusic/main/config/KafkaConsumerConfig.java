@@ -1,8 +1,9 @@
 package com.grademusic.main.config;
 
+import com.grademusic.main.model.message.AlbumStatisticsUpdateMessage;
+import com.grademusic.main.model.message.UserStatisticsUpdateMessage;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.common.serialization.LongDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,7 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,41 +26,49 @@ public class KafkaConsumerConfig {
     private final KafkaConfig kafkaConfig;
 
     @Bean
-    public ConsumerFactory<String, String> albumStatisticsConsumerFactory() {
+    public ConsumerFactory<String, AlbumStatisticsUpdateMessage> albumStatisticsConsumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConfig.getBootstrapServers());
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, GENERAL_CONSUMER_GROUP_ID);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "20");
 
-        return new DefaultKafkaConsumerFactory<>(props);
+        return new DefaultKafkaConsumerFactory<>(
+                props,
+                new StringDeserializer(),
+                new JsonDeserializer<>(AlbumStatisticsUpdateMessage.class)
+        );
     }
 
     @Bean
-    public ConsumerFactory<String, Long> userStatisticsConsumerFactory() {
+    public ConsumerFactory<String, UserStatisticsUpdateMessage> userStatisticsConsumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConfig.getBootstrapServers());
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, LongDeserializer.class);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, GENERAL_CONSUMER_GROUP_ID);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "20");
 
-        return new DefaultKafkaConsumerFactory<>(props);
+        return new DefaultKafkaConsumerFactory<>(
+                props,
+                new StringDeserializer(),
+                new JsonDeserializer<>(UserStatisticsUpdateMessage.class)
+        );
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, String> albumStatisticsContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    public ConcurrentKafkaListenerContainerFactory<String, AlbumStatisticsUpdateMessage> albumStatisticsContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, AlbumStatisticsUpdateMessage> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(albumStatisticsConsumerFactory());
+        factory.setBatchListener(true);
 
         return factory;
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Long> userStatisticsContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, Long> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    public ConcurrentKafkaListenerContainerFactory<String, UserStatisticsUpdateMessage> userStatisticsContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, UserStatisticsUpdateMessage> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(userStatisticsConsumerFactory());
+        factory.setBatchListener(true);
 
         return factory;
     }

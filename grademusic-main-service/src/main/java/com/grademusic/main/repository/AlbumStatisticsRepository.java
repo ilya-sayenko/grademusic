@@ -1,9 +1,52 @@
 package com.grademusic.main.repository;
 
 import com.grademusic.main.entity.AlbumStatistics;
+import com.grademusic.main.model.projection.AlbumStatisticsByGrades;
+import com.grademusic.main.model.projection.AlbumStatisticsByWishlist;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AlbumStatisticsRepository extends JpaRepository<AlbumStatistics, String> {
+
+    @Modifying
+    @Query(value = """
+            insert into album_statistics(
+                album_id,
+                grade,
+                count_of_grades,
+                updated_at
+            )
+            values(
+                :#{#statistics.albumId},
+                :#{#statistics.grade},
+                :#{#statistics.countOfGrades},
+                now()
+            )
+            on conflict(album_id) do update set
+                grade = :#{#statistics.grade},
+                count_of_grades = :#{#statistics.countOfGrades},
+                updated_at = now()
+            """, nativeQuery = true)
+    void saveStatisticsByGrades(AlbumStatisticsByGrades statistics);
+
+    @Modifying
+    @Query(value = """
+            insert into album_statistics(
+                album_id,
+                count_of_wishlist_items,
+                updated_at
+            )
+            values(
+                :#{#statistics.albumId},
+                :#{#statistics.countOfWishlistItems},
+                now()
+            )
+            on conflict(album_id) do update set
+                count_of_wishlist_items = :#{#statistics.countOfWishlistItems},
+                updated_at = now()
+            """, nativeQuery = true)
+    void saveStatisticsByWishlist(AlbumStatisticsByWishlist statistics);
 }

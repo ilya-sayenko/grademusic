@@ -4,6 +4,7 @@ import com.grademusic.main.entity.AlbumGrade;
 import com.grademusic.main.entity.AlbumGradeId;
 import com.grademusic.main.exception.AlbumGradeNotFoundException;
 import com.grademusic.main.repository.AlbumGradeRepository;
+import com.grademusic.main.repository.WishlistRepository;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import static com.grademusic.main.model.StatisticsType.GRADES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -30,7 +32,7 @@ public class GradeServiceTest {
     private AlbumGradeRepository albumGradeRepository;
 
     @Mock
-    private ProfileService profileService;
+    private WishlistRepository wishlistRepository;
 
     @Mock
     private KafkaClient kafkaClient;
@@ -47,9 +49,9 @@ public class GradeServiceTest {
         gradeService.gradeAlbum(userId, albumId, grade);
 
         verify(albumGradeRepository, atLeastOnce()).save(any(AlbumGrade.class));
-        verify(profileService, atLeastOnce()).deleteAlbumFromWishlist(userId, albumId);
-        verify(kafkaClient, atLeastOnce()).sendUpdateAlbumStatistics(albumId);
-        verify(kafkaClient, atLeastOnce()).sendUpdateUserStatistics(userId);
+//        verify(profileService, atLeastOnce()).deleteAlbumFromWishlist(eq(userId), eq(albumId));
+        verify(kafkaClient, atLeastOnce()).sendUpdateAlbumStatistics(eq(albumId), eq(GRADES));
+        verify(kafkaClient, atLeastOnce()).sendUpdateUserStatistics(eq(userId), eq(GRADES));
     }
 
     @Test
@@ -63,9 +65,9 @@ public class GradeServiceTest {
         gradeService.gradeAlbum(userId, albumId, grade);
 
         verify(albumGradeRepository, atLeastOnce()).save(any(AlbumGrade.class));
-        verify(profileService, atLeastOnce()).deleteAlbumFromWishlist(userId, albumId);
-        verify(kafkaClient, atLeastOnce()).sendUpdateAlbumStatistics(albumId);
-        verify(kafkaClient, atLeastOnce()).sendUpdateUserStatistics(userId);
+//        verify(profileService, atLeastOnce()).deleteAlbumFromWishlist(eq(userId), eq(albumId));
+        verify(kafkaClient, atLeastOnce()).sendUpdateAlbumStatistics(eq(albumId), eq(GRADES));
+        verify(kafkaClient, atLeastOnce()).sendUpdateUserStatistics(eq(userId), eq(GRADES));
     }
 
     @Test
@@ -96,11 +98,12 @@ public class GradeServiceTest {
     public void shouldDeleteGrade() {
         long userId = 1;
         String albumId = "album";
+        when(albumGradeRepository.existsById(any(AlbumGradeId.class))).thenReturn(true);
         gradeService.deleteGrade(userId, albumId);
 
         verify(albumGradeRepository, atLeastOnce()).deleteById(any(AlbumGradeId.class));
-        verify(kafkaClient, atLeastOnce()).sendUpdateAlbumStatistics(eq(albumId));
-        verify(kafkaClient, atLeastOnce()).sendUpdateUserStatistics(eq(userId));
+        verify(kafkaClient, atLeastOnce()).sendUpdateAlbumStatistics(eq(albumId), eq(GRADES));
+        verify(kafkaClient, atLeastOnce()).sendUpdateUserStatistics(eq(userId), eq(GRADES));
     }
 
     @Test

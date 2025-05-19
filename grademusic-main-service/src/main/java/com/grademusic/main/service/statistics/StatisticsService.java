@@ -1,4 +1,4 @@
-package com.grademusic.main.service;
+package com.grademusic.main.service.statistics;
 
 import com.grademusic.main.entity.AlbumStatistics;
 import com.grademusic.main.entity.UserStatistics;
@@ -6,10 +6,6 @@ import com.grademusic.main.entity.UserStatistics;
 import java.util.List;
 
 public interface StatisticsService {
-
-    void updateAlbumStatistics(String albumId);
-
-    void updateUserStatistics(Long userId);
 
     AlbumStatistics findAlbumStatisticsById(String albumId);
 

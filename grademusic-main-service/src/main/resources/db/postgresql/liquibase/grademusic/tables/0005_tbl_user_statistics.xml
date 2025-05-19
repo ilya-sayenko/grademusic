@@ -12,6 +12,7 @@
             </column>
             <column name="average_grade" type="float"/>
             <column name="count_of_grades" type="bigint"/>
+            <column name="count_of_wishlist_items" type="bigint"/>
             <column name="first_grade_at" type="date"/>
             <column name="last_grade_at" type="date"/>
             <column name="updated_at" type="timestamptz"/>

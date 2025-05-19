@@ -1,24 +1,26 @@
-package com.grademusic.main.service;
+package com.grademusic.main.service.statistics;
 
 import com.grademusic.main.entity.AlbumStatistics;
 import com.grademusic.main.entity.UserStatistics;
-import com.grademusic.main.model.Album;
-import com.grademusic.main.model.projection.AlbumStatisticsByGrades;
-import com.grademusic.main.model.projection.UserStatisticsByGrades;
-import com.grademusic.main.repository.AlbumGradeRepository;
+import com.grademusic.main.model.message.AlbumStatisticsUpdateMessage;
+import com.grademusic.main.model.StatisticsType;
+import com.grademusic.main.model.message.UserStatisticsUpdateMessage;
 import com.grademusic.main.repository.AlbumStatisticsRepository;
 import com.grademusic.main.repository.UserStatisticsRepository;
-import com.grademusic.main.service.cache.AlbumCache;
 import com.grademusic.main.service.cache.AlbumStatisticsCache;
 import com.grademusic.main.service.cache.UserStatisticsCache;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.grademusic.main.config.KafkaConfig.ALBUM_STATISTICS_TOPIC;
 import static com.grademusic.main.config.KafkaConfig.USER_STATISTICS_TOPIC;
@@ -28,8 +30,6 @@ import static com.grademusic.main.config.KafkaConfig.USER_STATISTICS_TOPIC;
 @RequiredArgsConstructor
 public class StatisticsServiceImpl implements StatisticsService {
 
-    private final AlbumGradeRepository albumGradeRepository;
-
     private final AlbumStatisticsRepository albumStatisticsRepository;
 
     private final UserStatisticsRepository userStatisticsRepository;
@@ -38,51 +38,55 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     private final UserStatisticsCache userStatisticsCache;
 
-    private final AlbumCache albumCache;
+    private final UserStatisticsCalculatorFactory userStatisticsCalculatorFactory;
 
-    @Override
-    @Transactional
+    private final AlbumStatisticsCalculatorFactory albumStatisticsCalculatorFactory;
+    
+    @KafkaListener(
+            topics = USER_STATISTICS_TOPIC,
+            containerFactory = "userStatisticsContainerFactory",
+            batch = "true"
+    )
+    private void updateUsersStatistics(ConsumerRecords<String, UserStatisticsUpdateMessage> records) {
+        Map<StatisticsType, Set<Long>> statisticsMap = new HashMap<>();
+        Set<Long> userIds = new HashSet<>();
+        records.forEach(record -> {
+            Long userId = record.value().userId();
+            StatisticsType statisticsType = StatisticsType.valueOf(record.key());
+            statisticsMap.computeIfAbsent(statisticsType, type -> new HashSet<>()).add(userId);
+            userIds.add(userId);
+            log.info("Received message for user update statistics userId={}, statisticsType={}", userId, statisticsType);
+        });
+        for (Map.Entry<StatisticsType, Set<Long>> entry : statisticsMap.entrySet()) {
+            userStatisticsCalculatorFactory.findCalculator(entry.getKey())
+                    .calculateStatistics(entry.getValue().stream().toList());
+        }
+        for (UserStatistics userStatistics : userStatisticsRepository.findAllById(userIds)) {
+            userStatisticsCache.put(userStatistics);
+        }
+    }
+    
     @KafkaListener(
             topics = ALBUM_STATISTICS_TOPIC,
             containerFactory = "albumStatisticsContainerFactory"
     )
-    public void updateAlbumStatistics(String albumId) {
-        log.info("Received message for album id={} update statistics", albumId);
-        AlbumStatisticsByGrades statisticsByGrades = albumGradeRepository.calculateAlbumStatistics(albumId);
-        AlbumStatistics albumStatistics = AlbumStatistics.builder()
-                .albumId(albumId)
-                .grade(statisticsByGrades.getGrade())
-                .countOfGrades(statisticsByGrades.getCountOfGrades())
-                .build();
-        albumStatistics = albumStatisticsRepository.saveAndFlush(albumStatistics);
-        albumStatisticsCache.put(albumStatistics);
-
-        Optional<Album> cachedAlbumOpt = albumCache.findById(albumId);
-        if (cachedAlbumOpt.isPresent()) {
-            Album cachedAlbum = cachedAlbumOpt.get();
-            cachedAlbum.setGrade(statisticsByGrades.getGrade());
-            albumCache.put(cachedAlbum);
+    private void updateAlbumsStatistics(ConsumerRecords<String, AlbumStatisticsUpdateMessage> records) {
+        Map<StatisticsType, Set<String>> statisticsMap = new HashMap<>();
+        Set<String> albumIds = new HashSet<>();
+        records.forEach(record -> {
+            String albumId = record.value().albumId();
+            StatisticsType statisticsType = StatisticsType.valueOf(record.key());
+            statisticsMap.computeIfAbsent(statisticsType, type -> new HashSet<>()).add(albumId);
+            albumIds.add(albumId);
+            log.info("Received message for album update statistics userId={}, statisticsType={}", albumId, statisticsType);
+        });
+        for (Map.Entry<StatisticsType, Set<String>> entry : statisticsMap.entrySet()) {
+            albumStatisticsCalculatorFactory.findCalculator(entry.getKey())
+                    .calculateStatistics(entry.getValue().stream().toList());
         }
-    }
-
-    @Override
-    @Transactional
-    @KafkaListener(
-            topics = USER_STATISTICS_TOPIC,
-            containerFactory = "userStatisticsContainerFactory"
-    )
-    public void updateUserStatistics(Long userId) {
-        log.info("Received message for user id={} update statistics", userId);
-        UserStatisticsByGrades statisticsByGrades = albumGradeRepository.calculateUserStatistics(userId);
-        UserStatistics userStatistics = UserStatistics.builder()
-                    .userId(userId)
-                    .averageGrade(statisticsByGrades.getAverageGrade())
-                    .countOfGrades(statisticsByGrades.getCountOfGrades())
-                    .firstGradeDate(statisticsByGrades.getFirstGradeDate())
-                    .lastGradeDate(statisticsByGrades.getLastGradeDate())
-                    .build();
-        userStatistics = userStatisticsRepository.saveAndFlush(userStatistics);
-        userStatisticsCache.put(userStatistics);
+        for (AlbumStatistics albumStatistics : albumStatisticsRepository.findAllById(albumIds)) {
+            albumStatisticsCache.put(albumStatistics);
+        }
     }
 
     @Override

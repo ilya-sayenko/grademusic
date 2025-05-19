@@ -5,6 +5,7 @@ import com.grademusic.main.controller.model.AlbumGradeRequest;
 import com.grademusic.main.model.User;
 import com.grademusic.main.service.GradeService;
 import com.grademusic.main.utils.AuthUtils;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,13 +22,13 @@ public class GradeController {
     private final GradeService gradeService;
 
     @PostMapping
-    public void gradeAlbum(Authentication authentication, @RequestBody AlbumGradeRequest request) {
+    public void gradeAlbum(Authentication authentication, @RequestBody @Valid AlbumGradeRequest request) {
         User user = AuthUtils.extractUser(authentication);
         gradeService.gradeAlbum(user.id(), request.albumId(), request.grade());
     }
 
     @DeleteMapping
-    public void deleteGrade(Authentication authentication, @RequestBody AlbumGradeDeleteRequest request) {
+    public void deleteGrade(Authentication authentication, @RequestBody @Valid AlbumGradeDeleteRequest request) {
         User user = AuthUtils.extractUser(authentication);
         gradeService.deleteGrade(user.id(), request.albumId());
     }

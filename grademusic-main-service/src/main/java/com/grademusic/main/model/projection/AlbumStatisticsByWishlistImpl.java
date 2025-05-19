@@ -7,11 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class AlbumStatisticsByGradesImpl implements AlbumStatisticsByGrades {
+public class AlbumStatisticsByWishlistImpl implements AlbumStatisticsByWishlist {
 
     private String albumId;
 
-    private Long countOfGrades;
-
-    private Double grade;
+    private Long countOfWishlistItems;
 }
