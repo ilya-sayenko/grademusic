@@ -7,15 +7,16 @@ import com.grademusic.main.repository.AlbumGradeRepository;
 import com.grademusic.main.repository.AlbumStatisticsRepository;
 import com.grademusic.main.service.cache.AlbumCache;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class AlbumStatisticsCalculatorByGrades implements AlbumStatisticsCalculator {
 
     private final AlbumGradeRepository albumGradeRepository;
@@ -28,9 +29,10 @@ public class AlbumStatisticsCalculatorByGrades implements AlbumStatisticsCalcula
     @Transactional
     public void calculateStatistics(List<String> albumIds) {
         List<AlbumStatisticsByGrades> albumStatistics = albumGradeRepository.calculateAlbumsStatistics(albumIds);
-        OffsetDateTime now = OffsetDateTime.now();
         for (AlbumStatisticsByGrades item : albumStatistics) {
             albumStatisticsRepository.saveStatisticsByGrades(item);
+            log.info("Saving album statistics by grades albumId={}, countOfGrades={}, grade={}",
+                    item.getAlbumId(), item.getCountOfGrades(), item.getGrade());
             Optional<Album> cachedAlbumOpt = albumCache.findById(item.getAlbumId());
             if (cachedAlbumOpt.isPresent()) {
                 Album cachedAlbum = cachedAlbumOpt.get();

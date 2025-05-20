@@ -2,6 +2,7 @@ package com.grademusic.main.repository;
 
 import com.grademusic.main.entity.AlbumStatistics;
 import com.grademusic.main.model.projection.AlbumStatisticsByGrades;
+import com.grademusic.main.model.projection.AlbumStatisticsByReviews;
 import com.grademusic.main.model.projection.AlbumStatisticsByWishlist;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -49,4 +50,22 @@ public interface AlbumStatisticsRepository extends JpaRepository<AlbumStatistics
                 updated_at = now()
             """, nativeQuery = true)
     void saveStatisticsByWishlist(AlbumStatisticsByWishlist statistics);
+
+    @Modifying
+    @Query(value = """
+            insert into album_statistics(
+                album_id,
+                count_of_reviews,
+                updated_at
+            )
+            values(
+                :#{#statistics.albumId},
+                :#{#statistics.countOfReviews},
+                now()
+            )
+            on conflict(album_id) do update set
+                count_of_reviews = :#{#statistics.countOfReviews},
+                updated_at = now()
+            """, nativeQuery = true)
+    void saveStatisticsByReviews(AlbumStatisticsByReviews statistics);
 }

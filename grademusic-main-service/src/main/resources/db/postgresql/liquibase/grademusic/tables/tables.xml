@@ -11,4 +11,5 @@
     <include file="db/postgresql/liquibase/grademusic/tables/0004_tbl_album_statistics.xml"/>
     <include file="db/postgresql/liquibase/grademusic/tables/0005_tbl_user_statistics.xml"/>
     <include file="db/postgresql/liquibase/grademusic/tables/0006_tbl_user_wishlists.xml"/>
+    <include file="db/postgresql/liquibase/grademusic/tables/0007_tbl_album_reviews.xml"/>
 </databaseChangeLog>
