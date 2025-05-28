@@ -25,7 +25,7 @@ public class UserStatisticsCalculatorByReviews implements UserStatisticsCalculat
     public void calculateStatistics(List<Long> userIds) {
         List<UserStatisticsByReviews> userStatistics = albumReviewRepository.calculateUsersStatistics(userIds);
         for (UserStatisticsByReviews item : userStatistics) {
-            log.info("Saving user statistics by wishlist userId={}, countOfReviews={}",
+            log.info("Saving user statistics by reviews userId={}, countOfReviews={}",
                     item.getUserId(), item.getCountOfReviews());
             userStatisticsRepository.saveStatisticsByReviews(item);
         }

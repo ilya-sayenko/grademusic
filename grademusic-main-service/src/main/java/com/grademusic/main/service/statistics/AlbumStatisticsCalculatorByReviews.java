@@ -25,7 +25,7 @@ public class AlbumStatisticsCalculatorByReviews implements AlbumStatisticsCalcul
     public void calculateStatistics(List<String> albumIds) {
         List<AlbumStatisticsByReviews> albumStatistics = albumReviewRepository.calculateAlbumsStatistics(albumIds);
         for (AlbumStatisticsByReviews item : albumStatistics) {
-            log.info("Saving album statistics by wishlist albumId={}, countOfReviews={}",
+            log.info("Saving album statistics by reviews albumId={}, countOfReviews={}",
                     item.getAlbumId(), item.getCountOfReviews());
             albumStatisticsRepository.saveStatisticsByReviews(item);
         }

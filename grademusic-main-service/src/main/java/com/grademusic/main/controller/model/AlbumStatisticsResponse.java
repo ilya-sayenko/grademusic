@@ -7,6 +7,7 @@ public record AlbumStatisticsResponse(
         String albumId,
         Double grade,
         Long countOfGrades,
-        Long countOfWishlistItems
+        Long countOfWishlistItems,
+        Long countOfReviews
 ) {
 }

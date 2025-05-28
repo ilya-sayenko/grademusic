@@ -25,7 +25,7 @@ public class UserStatisticsCalculatorByGrades implements UserStatisticsCalculato
     public void calculateStatistics(List<Long> userIds) {
         List<UserStatisticsByGrades> userStatistics = albumGradeRepository.calculateUsersStatistics(userIds);
         for (UserStatisticsByGrades item : userStatistics) {
-            log.info("Saving user statistics by wishlist userId={}, averageGrade={}, countOfGrades={}, firstGradeDate={}, lastGradeDate={}",
+            log.info("Saving user statistics by grades userId={}, averageGrade={}, countOfGrades={}, firstGradeDate={}, lastGradeDate={}",
                     item.getUserId(), item.getAverageGrade(), item.getCountOfGrades(), item.getFirstGradeDate(), item.getLastGradeDate());
             userStatisticsRepository.saveStatisticsByGrades(item);
         }

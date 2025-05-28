@@ -101,6 +101,8 @@ public class StatisticsServiceImpl implements StatisticsService {
                         .albumId(albumId)
                         .countOfGrades(0L)
                         .grade(0.0)
+                        .countOfWishlistItems(0L)
+                        .countOfReviews(0L)
                         .build());
         albumStatisticsCache.put(albumStatistics);
 
@@ -133,6 +135,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                 UserStatistics.builder()
                         .userId(userId)
                         .countOfGrades(0L)
+                        .countOfReviews(0L)
                         .averageGrade(0.0)
                         .build()
         );
