@@ -71,7 +71,7 @@ public class StatisticsServiceImpl implements StatisticsService {
             String albumId = record.value().albumId();
             StatisticsType statisticsType = StatisticsType.valueOf(record.key());
             statisticsMap.computeIfAbsent(statisticsType, type -> new HashSet<>()).add(albumId);
-            log.info("Received message for album update statistics userId={}, statisticsType={}", albumId, statisticsType);
+            log.info("Received message for album update statistics albumId={}, statisticsType={}", albumId, statisticsType);
         });
         for (Map.Entry<StatisticsType, Set<String>> entry : statisticsMap.entrySet()) {
             albumStatisticsCalculatorFactory.findCalculator(entry.getKey())
