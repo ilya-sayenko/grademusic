@@ -49,20 +49,15 @@ public class StatisticsServiceImpl implements StatisticsService {
     )
     private void updateUsersStatistics(ConsumerRecords<String, UserStatisticsUpdateMessage> records) {
         Map<StatisticsType, Set<Long>> statisticsMap = new HashMap<>();
-        Set<Long> userIds = new HashSet<>();
         records.forEach(record -> {
             Long userId = record.value().userId();
             StatisticsType statisticsType = StatisticsType.valueOf(record.key());
             statisticsMap.computeIfAbsent(statisticsType, type -> new HashSet<>()).add(userId);
-            userIds.add(userId);
             log.info("Received message for user update statistics userId={}, statisticsType={}", userId, statisticsType);
         });
         for (Map.Entry<StatisticsType, Set<Long>> entry : statisticsMap.entrySet()) {
             userStatisticsCalculatorFactory.findCalculator(entry.getKey())
                     .calculateStatistics(entry.getValue().stream().toList());
-        }
-        for (UserStatistics userStatistics : userStatisticsRepository.findAllById(userIds)) {
-            userStatisticsCache.put(userStatistics);
         }
     }
     
@@ -72,20 +67,15 @@ public class StatisticsServiceImpl implements StatisticsService {
     )
     private void updateAlbumsStatistics(ConsumerRecords<String, AlbumStatisticsUpdateMessage> records) {
         Map<StatisticsType, Set<String>> statisticsMap = new HashMap<>();
-        Set<String> albumIds = new HashSet<>();
         records.forEach(record -> {
             String albumId = record.value().albumId();
             StatisticsType statisticsType = StatisticsType.valueOf(record.key());
             statisticsMap.computeIfAbsent(statisticsType, type -> new HashSet<>()).add(albumId);
-            albumIds.add(albumId);
             log.info("Received message for album update statistics userId={}, statisticsType={}", albumId, statisticsType);
         });
         for (Map.Entry<StatisticsType, Set<String>> entry : statisticsMap.entrySet()) {
             albumStatisticsCalculatorFactory.findCalculator(entry.getKey())
                     .calculateStatistics(entry.getValue().stream().toList());
-        }
-        for (AlbumStatistics albumStatistics : albumStatisticsRepository.findAllById(albumIds)) {
-            albumStatisticsCache.put(albumStatistics);
         }
     }
 

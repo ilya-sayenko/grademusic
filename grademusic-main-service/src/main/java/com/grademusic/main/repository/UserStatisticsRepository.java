@@ -5,14 +5,12 @@ import com.grademusic.main.model.projection.UserStatisticsByGrades;
 import com.grademusic.main.model.projection.UserStatisticsByReviews;
 import com.grademusic.main.model.projection.UserStatisticsByWishlist;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserStatisticsRepository extends JpaRepository<UserStatistics, Long> {
 
-    @Modifying
     @Query(value = """
             insert into user_statistics(
                 user_id,
@@ -36,10 +34,10 @@ public interface UserStatisticsRepository extends JpaRepository<UserStatistics, 
                 first_grade_at = :#{#statistics.firstGradeDate},
                 last_grade_at = :#{#statistics.lastGradeDate},
                 updated_at = now()
+            returning *
             """, nativeQuery = true)
-    void saveStatisticsByGrades(UserStatisticsByGrades statistics);
+    UserStatistics saveStatisticsByGrades(UserStatisticsByGrades statistics);
 
-    @Modifying
     @Query(value = """
             insert into user_statistics(
                 user_id,
@@ -54,10 +52,10 @@ public interface UserStatisticsRepository extends JpaRepository<UserStatistics, 
             on conflict(user_id) do update set
                 count_of_wishlist_items = :#{#statistics.countOfWishlistItems},
                 updated_at = now()
+            returning *
             """, nativeQuery = true)
-    void saveStatisticsByWishlist(UserStatisticsByWishlist statistics);
+    UserStatistics saveStatisticsByWishlist(UserStatisticsByWishlist statistics);
 
-    @Modifying
     @Query(value = """
             insert into user_statistics(
                 user_id,
@@ -72,6 +70,7 @@ public interface UserStatisticsRepository extends JpaRepository<UserStatistics, 
             on conflict(user_id) do update set
                 count_of_reviews = :#{#statistics.countOfReviews},
                 updated_at = now()
+            returning *
             """, nativeQuery = true)
-    void saveStatisticsByReviews(UserStatisticsByReviews statistics);
+    UserStatistics saveStatisticsByReviews(UserStatisticsByReviews statistics);
 }

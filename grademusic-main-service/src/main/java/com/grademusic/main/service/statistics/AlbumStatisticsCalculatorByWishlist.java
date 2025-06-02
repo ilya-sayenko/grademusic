@@ -1,9 +1,11 @@
 package com.grademusic.main.service.statistics;
 
+import com.grademusic.main.entity.AlbumStatistics;
 import com.grademusic.main.model.StatisticsType;
 import com.grademusic.main.model.projection.AlbumStatisticsByWishlist;
 import com.grademusic.main.repository.AlbumStatisticsRepository;
 import com.grademusic.main.repository.WishlistRepository;
+import com.grademusic.main.service.cache.AlbumStatisticsCache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -20,6 +22,8 @@ public class AlbumStatisticsCalculatorByWishlist implements AlbumStatisticsCalcu
 
     private final AlbumStatisticsRepository albumStatisticsRepository;
 
+    private final AlbumStatisticsCache albumStatisticsCache;
+
     @Override
     @Transactional
     public void calculateStatistics(List<String> albumIds) {
@@ -27,7 +31,8 @@ public class AlbumStatisticsCalculatorByWishlist implements AlbumStatisticsCalcu
         for (AlbumStatisticsByWishlist item : albumStatistics) {
             log.info("Saving album statistics by wishlist albumId={}, countOfWishlistItems={}",
                     item.getAlbumId(), item.getCountOfWishlistItems());
-            albumStatisticsRepository.saveStatisticsByWishlist(item);
+            AlbumStatistics savedAlbumStatistics = albumStatisticsRepository.saveStatisticsByWishlist(item);
+            albumStatisticsCache.put(savedAlbumStatistics);
         }
     }
 

@@ -1,11 +1,13 @@
 package com.grademusic.main.service;
 
 import com.grademusic.main.controller.model.AlbumSearchRequest;
+import com.grademusic.main.entity.AlbumStatistics;
 import com.grademusic.main.mapper.AlbumMapper;
 import com.grademusic.main.model.Album;
 import com.grademusic.main.model.lastfm.AlbumSearchRootLastFm;
 import com.grademusic.main.service.cache.AlbumCache;
 import com.grademusic.main.service.http.LastFmClient;
+import com.grademusic.main.service.statistics.StatisticsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,8 @@ public class AlbumServiceLastFm implements AlbumService {
     private final AlbumMapper albumMapper;
 
     private final AlbumCache albumCache;
+
+    private final StatisticsService statisticsService;
 
     @Override
     public List<Album> findAlbums(AlbumSearchRequest albumSearchRequest) {
@@ -51,7 +55,9 @@ public class AlbumServiceLastFm implements AlbumService {
         }
 
         Album album = albumMapper.fromLastFm(lastFmClient.albumGetInfo(id).album());
+        Double grade = statisticsService.findAlbumStatisticsById(id).getGrade();
         album.setId(id);
+        album.setGrade(grade);
         albumCache.put(album);
 
         return album;
@@ -67,13 +73,20 @@ public class AlbumServiceLastFm implements AlbumService {
 
         Map<String, Album> cachedAlbumsMap = cachedAlbums.stream()
                 .collect(Collectors.toMap(Album::getId, Function.identity()));
+        Map<String, AlbumStatistics> statisticsMap = statisticsService.findAllAlbumStatisticsById(albumIds).stream()
+                .collect(Collectors.toMap(AlbumStatistics::getAlbumId, Function.identity()));
         List<Album> albums = new ArrayList<>();
+
         for (String albumId : albumIds) {
             Album album = cachedAlbumsMap.get(albumId);
             if (album == null) {
                 log.info("Getting album id={} from LastFm", albumId);
                 album = albumMapper.fromLastFm(lastFmClient.albumGetInfo(albumId).album());
                 album.setId(albumId);
+                AlbumStatistics albumStatistics = statisticsMap.get(albumId);
+                if (albumStatistics != null) {
+                    album.setGrade(albumStatistics.getGrade());
+                }
             }
             albums.add(album);
             albumCache.put(album);

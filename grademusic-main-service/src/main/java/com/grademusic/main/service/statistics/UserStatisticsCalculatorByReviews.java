@@ -1,9 +1,11 @@
 package com.grademusic.main.service.statistics;
 
+import com.grademusic.main.entity.UserStatistics;
 import com.grademusic.main.model.StatisticsType;
 import com.grademusic.main.model.projection.UserStatisticsByReviews;
 import com.grademusic.main.repository.AlbumReviewRepository;
 import com.grademusic.main.repository.UserStatisticsRepository;
+import com.grademusic.main.service.cache.UserStatisticsCache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -20,6 +22,8 @@ public class UserStatisticsCalculatorByReviews implements UserStatisticsCalculat
 
     private final AlbumReviewRepository albumReviewRepository;
 
+    private final UserStatisticsCache userStatisticsCache;
+
     @Override
     @Transactional
     public void calculateStatistics(List<Long> userIds) {
@@ -27,7 +31,8 @@ public class UserStatisticsCalculatorByReviews implements UserStatisticsCalculat
         for (UserStatisticsByReviews item : userStatistics) {
             log.info("Saving user statistics by reviews userId={}, countOfReviews={}",
                     item.getUserId(), item.getCountOfReviews());
-            userStatisticsRepository.saveStatisticsByReviews(item);
+            UserStatistics savedUserStatistics = userStatisticsRepository.saveStatisticsByReviews(item);
+            userStatisticsCache.put(savedUserStatistics);
         }
     }
 
