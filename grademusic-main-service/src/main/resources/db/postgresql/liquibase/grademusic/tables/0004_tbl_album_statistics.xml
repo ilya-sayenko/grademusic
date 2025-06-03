@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="insaenko" id="create_table_album_statistics">
+        <createTable tableName="album_statistics">
+            <column name="album_id" type="varchar(255)">
+                <constraints unique="true"/>
+            </column>
+            <column name="grade" type="float"/>
+            <column name="count_of_grades" type="bigint"/>
+            <column name="count_of_wishlist_items" type="bigint"/>
+            <column name="count_of_reviews" type="bigint"/>
+            <column name="updated_at" type="timestamptz"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

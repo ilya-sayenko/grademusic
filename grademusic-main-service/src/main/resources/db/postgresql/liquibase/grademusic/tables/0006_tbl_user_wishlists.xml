@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet author="insaenko" id="create_table_user_wishlists">
+        <createTable tableName="user_wishlists">
+            <column name="user_id" type="bigint"/>
+            <column name="album_id" type="varchar(255)"/>
+            <column name="created_at" type="timestamptz"/>
+        </createTable>
+
+        <addPrimaryKey
+                columnNames="user_id, album_id"
+                constraintName="pk_user_wishlists"
+                tableName="user_wishlists" />
+
+        <addForeignKeyConstraint
+                baseTableName="user_wishlists"
+                baseColumnNames="user_id"
+                constraintName="fk_user_wishlists_users"
+                referencedTableName="users"
+                referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>
