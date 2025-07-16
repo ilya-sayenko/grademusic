@@ -1,0 +1,29 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: grademusic-gateway
+  cloud:
+    discovery:
+      enabled: true
+    gateway:
+      default-filters:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+
+openapi-route-definition-locator:
+  services:
+    - id: grademusic-main-service
+      uri: http://localhost:8082
+      openapi-definition-uri: http://localhost:8082/v3/api-docs
+    - id: grademusic-auth-service
+      uri: http://localhost:8081
+      openapi-definition-uri: http://localhost:8081/v3/api-docs
+  update-scheduler:
+    fixed-delay: 60s
+    remove-routes-on-update-failures-after: 120s

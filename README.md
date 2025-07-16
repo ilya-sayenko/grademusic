@@ -1,3 +1,19 @@
-add XDG_CONFIG_HOME environment variable with path which application can write(or keep system default if it's running under admin/root etc)
+# Grademusic
+Application for grade music albums.
 
-configure git and ssh: spasibo.api-management.git.*, private key must be named id_rsa
+## Stack
+Java, Spring Boot, PostgreSQL, Kafka, Redis.
+
+## Сomposition of services
+
+### grademusic-gateway
+API Gateway service. Using [OpenAPI Route Definition Locator](https://github.com/jbretsch/openapi-route-definition-locator) for creating route definitions.
+
+### grademusic-auth-service
+Authentication and authorization service via JWT token.
+
+### grademusic-main-service
+Main service. Provides functionality:
+- Search music album by name
+- Add album to wishlist
+- Calculate album and user statistics (count of grades, average grade, ...)
